@@ -1,3 +1,5 @@
+import { BufferConnection } from "@/components/buffer-connection";
+
 export default function SettingsPage() {
   return (
     <div className="p-6 lg:p-8">
@@ -23,11 +25,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="bg-card border rounded-xl p-6">
-          <h2 className="font-medium mb-4">Publishing</h2>
-          <p className="text-sm text-muted-foreground">Buffer connection and simulation mode.</p>
-          <button className="mt-3 text-sm bg-muted px-3 py-1.5 rounded-lg">Connect Buffer (coming soon)</button>
-        </div>
+        <BufferConnection />
       </div>
     </div>
   );

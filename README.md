@@ -52,7 +52,17 @@ The lockfile includes a PostCSS override for Next.js so it uses the patched Post
 4. For content persistence, set `MONGODB_URI` in Vercel's environment variables to a reachable MongoDB Atlas URI, with database network access configured for the deployment. Do not use a localhost URI on Vercel. Redeploy after changing environment variables.
 5. Deploy. Pages can be deployed without `MONGODB_URI`; `/api/content` requires it at runtime.
 
-This is an internal prototype with sample data. AI generation, publishing, and account connections are not implemented. The content API currently has no authentication; keep the deployment access restricted if you connect a private database.
+This is an internal prototype with sample data. AI generation and live publishing are not implemented. The APIs currently have no application authentication; keep the deployment access restricted if you connect private accounts or a private database.
+
+## Buffer connection
+
+Set `BUFFER_API_KEY` and `BUFFER_ORGANIZATION_ID` in the ignored `.env.local` file, then restart the local server. For Vercel, set both in the project's environment settings and redeploy. Never put real credentials in `.env.example` or variables prefixed with `NEXT_PUBLIC_`.
+
+In Settings, use **Check Buffer connection** to discover the configured organization's social profiles and inspect disconnected, locked, and paused statuses. An API key is appropriate for this I8IS-only prototype; customer OAuth is a later milestone.
+
+`GET /api/publishing/connection` uses a server-only gateway and a Buffer adapter. The organization binding comes from server configuration, never client input. Credentials and raw upstream errors are excluded from responses. There are no publishing mutations: the gateway reports simulation mode and cannot create, schedule, or publish posts. Adding another tenant requires authenticated tenant lookup and separately scoped credentials before enabling its gateway.
+
+Run `npm test` for adapter request scoping, profile mapping, empty accounts, authentication failures, rate limits, malformed responses, and error redaction. API reference: https://developers.buffer.com/reference.html.
 
 ## Current status
 - Sidebar with 6 workspaces + Settings
