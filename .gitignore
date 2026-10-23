@@ -22,3 +22,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temporary repository checkout and local server logs
+/.repo/
+*.log
