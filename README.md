@@ -1,6 +1,18 @@
 # I8IS Marketing OS
 
-Internal autonomous AI marketing operating system for I8IS.
+Internal autonomous AI marketing operating system for I8IS, with I8IS as the first tenant.
+
+## Product direction
+
+A central Marketing Brain will coordinate specialized research, strategy, content, creative, publishing, analytics, and optimization agents. The dashboard and MongoDB data layer are the first prototype milestone.
+
+- Ground strategy and generated content in a verified company knowledge base; distinguish verified facts from assumptions and never present invented company facts as verified.
+- Support onboarding with business goals and connected Facebook, Instagram, and LinkedIn accounts.
+- Keep publishing simulated in the prototype. Introduce Buffer as the first publishing adapter behind a provider gateway, leaving room for direct Meta and LinkedIn adapters.
+- Design future persistence and API work around tenant isolation, with I8IS as the first tenant. The current models and content API do not yet enforce tenant isolation.
+- Add durable background jobs and LangGraph-style orchestration later. Social OAuth will use an application-owned flow, without requiring customer developer apps.
+
+The current UI uses sample data. Agent orchestration, social OAuth, provider integrations, tenant enforcement, and verified knowledge workflows are planned capabilities rather than implemented features.
 
 ## Stack
 - Next.js 15 (App Router) + TypeScript + Tailwind
