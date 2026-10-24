@@ -65,7 +65,10 @@ In Settings, use **Check Buffer connection** to discover the configured organiza
 Run `npm test` for adapter request scoping, profile mapping, empty accounts, authentication failures, rate limits, malformed responses, and error redaction. API reference: https://developers.buffer.com/reference.html.
 
 ## Current status
-- Sidebar with 6 workspaces + Settings
+- First Figma implementation: Orbit navigation, page search, mobile navigation, and the Mission Control overview, using the DM Sans font and the design's navy/lime palette.
+- Mission Control reads Buffer profile health and a snapshot of the latest 50 content records. Agent cards describe the planned workflow; they do not represent running agents.
+- The Mission Control goal prompt saves a draft in this browser's local storage. It does not sync goals to MongoDB or start agent execution.
+- Sidebar links to the seven existing pages; planned modules are marked unavailable.
 - Command Center with strategy overview
 - Content Calendar (month view with sample posts and status colors)
 - Campaign Studio, Company Brain, Creative Studio, Performance Intelligence

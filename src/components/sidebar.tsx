@@ -1,43 +1,64 @@
-import { Calendar, Brain, LayoutDashboard, Megaphone, Image as ImageIcon, BarChart3, Settings } from "lucide-react";
-import Link from "next/link";
+"use client";
 
-const navItems = [
-  { href: "/", label: "Command Center", icon: LayoutDashboard },
-  { href: "/company-brain", label: "Company Brain", icon: Brain },
-  { href: "/campaigns", label: "Campaign Studio", icon: Megaphone },
-  { href: "/calendar", label: "Content Calendar", icon: Calendar },
-  { href: "/creative", label: "Creative Studio", icon: ImageIcon },
-  { href: "/performance", label: "Performance", icon: BarChart3 },
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export const workspacePages = [
+  { href: "/", label: "Overview" },
+  { href: "/calendar", label: "Planner" },
+  { href: "/campaigns", label: "Campaigns" },
+  { href: "/creative", label: "Creative lab" },
+  { href: "/performance", label: "Intelligence" },
+  { href: "/company-brain", label: "Company DNA" },
+  { href: "/settings", label: "Settings" },
 ];
 
-export function Sidebar() {
+const navGroups = [
+  [
+    { glyph: "◫", label: "Overview", href: "/" },
+    { glyph: "◉", label: "AI workforce", href: "/#workforce" },
+    { glyph: "⌕", label: "Discover", href: null },
+    { glyph: "↗", label: "Strategy", href: null },
+  ],
+  [
+    { glyph: "▦", label: "Planner", href: "/calendar" },
+    { glyph: "◧", label: "Campaigns", href: "/campaigns" },
+    { glyph: "✦", label: "Creative lab", href: "/creative" },
+    { glyph: "≡", label: "Editorial", href: null },
+    { glyph: "▤", label: "Assets", href: null },
+    { glyph: "◎", label: "Approvals", href: null },
+  ],
+  [
+    { glyph: "◷", label: "Intelligence", href: "/performance" },
+    { glyph: "▥", label: "Social inbox", href: null },
+  ],
+  [
+    { glyph: "◫", label: "Company DNA", href: "/company-brain" },
+    { glyph: "⇄", label: "Connections", href: "/settings#buffer-heading" },
+    { glyph: "⚙", label: "Settings", href: "/settings" },
+  ],
+];
+
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
   return (
-    <aside className="w-64 border-r bg-background flex flex-col">
-      <div className="p-6 border-b">
-        <h1 className="text-xl font-semibold tracking-tight">I8IS Marketing OS</h1>
-        <p className="text-xs text-muted-foreground mt-1">Internal Prototype</p>
-      </div>
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors"
-          >
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </Link>
-        ))}
+    <aside className="orbit-sidebar" aria-label="Workspace navigation">
+      <Link href="/" onClick={onNavigate} className="orbit-brand" aria-label="Orbit by I8IS home">
+        <span className="orbit-brand-mark" aria-hidden="true">✳</span>
+        <span className="orbit-wordmark">orbit</span><span className="orbit-brand-by">by I8IS</span>
+      </Link>
+      <p className="orbit-nav-eyebrow">Marketing intelligence</p>
+      <nav className="orbit-nav">
+        {navGroups.map((group, index) => <div key={index} className="orbit-nav-group">
+          {group.map(item => {
+            const active = item.href === pathname;
+            const contents = <><span className="orbit-nav-glyph" aria-hidden="true">{item.glyph}</span><span>{item.label}</span></>;
+            return item.href ? <Link key={item.label} href={item.href} onClick={onNavigate} className={`orbit-nav-item${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}>{contents}</Link>
+              : <span key={item.label} className="orbit-nav-item is-planned" aria-disabled="true" title={`${item.label} — coming soon`}>{contents}<span className="sr-only"> (coming soon)</span></span>;
+          })}
+        </div>)}
       </nav>
-      <div className="p-4 border-t">
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors"
-        >
-          <Settings className="h-4 w-4" />
-          Settings
-        </Link>
-      </div>
+      <div className="orbit-workspace"><span className="orbit-workspace-avatar">i8</span><div><p>I8IS workspace</p><span>Internal · Sandbox mode</span></div></div>
     </aside>
   );
 }
