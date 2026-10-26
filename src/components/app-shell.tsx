@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Menu, Search, X } from "lucide-react";
 import { Sidebar, workspacePages } from "./sidebar";
+import { signOut } from "next-auth/react";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, member }: { children: React.ReactNode; member: { email: string; name: string; role: string } }) {
   const pathname = usePathname();
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -29,10 +30,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return <div className="orbit-shell">
     <a className="orbit-skip-link" href="#main-content">Skip to content</a>
-    <div className="orbit-desktop-nav"><Sidebar /></div>
+    <div className="orbit-desktop-nav"><Sidebar admin={member.role === "admin"} /></div>
     <dialog ref={menu} className="orbit-mobile-menu" aria-label="Workspace menu" onClick={event => { if (event.target === event.currentTarget) menu.current?.close(); }}>
       <button className="orbit-menu-close" onClick={() => menu.current?.close()} aria-label="Close navigation"><X size={20} /></button>
-      <Sidebar onNavigate={() => menu.current?.close()} />
+      <Sidebar admin={member.role === "admin"} onNavigate={() => menu.current?.close()} />
     </dialog>
     <div className="orbit-main-shell">
       <header className="orbit-topbar">
@@ -48,7 +49,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>}
         </div>
         <span className="orbit-badge orbit-badge-green orbit-sandbox"><span className="orbit-dot" />Sandbox mode</span>
-        <Link href="/settings" className="orbit-user-avatar" aria-label="Open workspace settings">SA</Link>
+        <button onClick={() => void signOut({ redirectTo: "/login" })} className="orbit-user-avatar" aria-label={`Sign out ${member.email}`} title={`Sign out ${member.email}`}>{(member.name || member.email).slice(0, 2).toUpperCase()}</button>
       </header>
       <main id="main-content" className="orbit-main" tabIndex={-1}>{children}</main>
     </div>

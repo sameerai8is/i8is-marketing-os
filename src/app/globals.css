@@ -251,3 +251,45 @@ a.orbit-nav-item:hover { background: #17243a; color: white; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+.orbit-login { min-height: 100dvh; background: var(--orbit-canvas); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; color: var(--orbit-ink); }
+.orbit-login-card { width: min(100%, 490px); padding: 40px; border: 1px solid var(--orbit-line); border-radius: 24px; background: white; box-shadow: 0 18px 70px #0b142608; }
+.orbit-login-brand { display: flex; align-items: baseline; gap: 12px; margin-bottom: 40px; }
+.orbit-login-brand > span { color: var(--orbit-green); font-size: 30px; }
+.orbit-login-brand strong { font-size: 30px; letter-spacing: -1px; }
+.orbit-login-brand small { color: var(--orbit-muted); font-size: 11px; }
+.orbit-login h1 { font-size: 32px; line-height: 1.2; font-weight: 700; letter-spacing: -1px; margin: 24px 0 16px; }
+.orbit-login-card > p { color: var(--orbit-muted); font-size: 14px; line-height: 23px; }
+.orbit-login-submit { width: 100%; margin-top: 24px; min-height: 48px; font-size: 14px; }
+.orbit-login-submit > span { font-size: 19px; margin-right: 5px; }
+.orbit-login-submit:disabled { opacity: .5; cursor: not-allowed; }
+.orbit-login-card .orbit-login-note { font-size: 11px; line-height: 18px; border-top: 1px solid var(--orbit-line); padding-top: 20px; margin-top: 24px; }
+.orbit-login-alert { background: var(--orbit-amber-bg); color: var(--orbit-amber) !important; padding: 13px 15px; border-radius: 10px; font-size: 13px !important; line-height: 21px !important; margin-top: 20px; }
+.orbit-login-current { font-size: 12px; color: var(--orbit-muted); margin-top: 20px; line-height: 22px; }
+.orbit-login-footer { color: var(--orbit-muted); font-size: 11px; margin-top: 24px; text-align: center; }
+.orbit-text-button { color: var(--orbit-blue); font-size: 12px; font-weight: 600; padding: 4px 0; }
+.orbit-text-button:hover { text-decoration: underline; }
+.orbit-text-button:disabled { opacity: .5; cursor: not-allowed; }
+.orbit-team { padding: 34px 38px; max-width: 1500px; margin: 0 auto; }
+.orbit-team h2 { font-size: 18px; font-weight: 700; line-height: 26px; }
+.orbit-team-intro, .orbit-team-invite, .orbit-team-list { padding: 24px; margin-top: 20px; }
+.orbit-team-intro > p, .orbit-team-invite > p { font-size: 13px; color: var(--orbit-muted); line-height: 22px; margin-top: 8px; max-width: 850px; }
+.orbit-team-invite form { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; margin-top: 20px; }
+.orbit-team-invite label { display: flex; flex-direction: column; gap: 7px; font-size: 12px; font-weight: 600; }
+.orbit-team-invite label:first-child { flex: 1; min-width: 200px; }
+.orbit-team input, .orbit-team select { border: 1px solid var(--orbit-line); border-radius: 8px; background: white; color: var(--orbit-ink); font-size: 13px; min-height: 40px; padding: 9px 12px; }
+.orbit-team-note { font-size: 11px !important; line-height: 18px; color: var(--orbit-muted); }
+.orbit-team-success { background: var(--orbit-green-bg); color: var(--orbit-green); padding: 14px 18px; border-radius: 10px; font-size: 13px; margin-top: 20px; }
+.orbit-team-table-wrap { overflow-x: auto; margin-top: 20px; }
+.orbit-team table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.orbit-team th { color: var(--orbit-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--orbit-line); }
+.orbit-team td { padding: 16px 12px; border-bottom: 1px solid var(--orbit-line); }
+.orbit-team tr:last-child td { border-bottom: 0; }
+.orbit-team td:first-child { min-width: 220px; }
+.orbit-team td strong { display: block; font-weight: 600; }
+.orbit-team td:first-child > span { display: block; color: var(--orbit-muted); margin-top: 3px; font-size: 12px; }
+.orbit-team td small { display: inline-block; margin-right: 7px; margin-top: 5px; font-size: 10px; color: var(--orbit-blue); }
+.orbit-team td .orbit-badge { text-transform: capitalize; }
+.orbit-team-empty { font-size: 13px; color: var(--orbit-muted); margin-top: 20px; }
+@media (max-width: 800px) { .orbit-team { padding: 28px 20px; } }
+@media (max-width: 520px) { .orbit-login-card { padding: 28px 24px; } .orbit-login h1 { font-size: 29px; } .orbit-team { padding: 24px 16px; } .orbit-team-intro, .orbit-team-invite, .orbit-team-list { padding: 20px 16px; } }

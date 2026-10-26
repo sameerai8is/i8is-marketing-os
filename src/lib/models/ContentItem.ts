@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IContentItem extends Document {
+  tenantId: string;
   title: string;
   body: string;
   platform: "linkedin" | "facebook" | "instagram" | "twitter";
@@ -15,6 +16,7 @@ export interface IContentItem extends Document {
 
 const ContentItemSchema = new Schema<IContentItem>(
   {
+    tenantId: { type: String, required: true, index: true },
     title: { type: String, required: true },
     body: { type: String, required: true },
     platform: {
@@ -34,6 +36,8 @@ const ContentItemSchema = new Schema<IContentItem>(
   },
   { timestamps: true }
 );
+
+ContentItemSchema.index({ tenantId: 1, scheduledAt: -1 });
 
 export const ContentItem: Model<IContentItem> =
   mongoose.models.ContentItem || mongoose.model<IContentItem>("ContentItem", ContentItemSchema);

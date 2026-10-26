@@ -9,10 +9,10 @@ A central Marketing Brain will coordinate specialized research, strategy, conten
 - Ground strategy and generated content in a verified company knowledge base; distinguish verified facts from assumptions and never present invented company facts as verified.
 - Support onboarding with business goals and connected Facebook, Instagram, and LinkedIn accounts.
 - Keep publishing simulated in the prototype. Introduce Buffer as the first publishing adapter behind a provider gateway, leaving room for direct Meta and LinkedIn adapters.
-- Design future persistence and API work around tenant isolation, with I8IS as the first tenant. The current models and content API do not yet enforce tenant isolation.
+- I8IS is the first tenant. Content and member API operations are bound to the authenticated I8IS workspace. Additional tenant onboarding and other models still need a complete tenant-isolation design.
 - Add durable background jobs and LangGraph-style orchestration later. Social OAuth will use an application-owned flow, without requiring customer developer apps.
 
-The current UI uses sample data. Agent orchestration, social OAuth, provider integrations, tenant enforcement, and verified knowledge workflows are planned capabilities rather than implemented features.
+The current UI uses sample data. Agent orchestration, social publishing OAuth, live publishing adapters, additional tenant onboarding, and verified knowledge workflows are planned capabilities rather than implemented features.
 
 ## Stack
 - Next.js 15 (App Router) + TypeScript + Tailwind
@@ -54,9 +54,31 @@ The lockfile includes a PostCSS override for Next.js so it uses the patched Post
 
 Store `OPENAI_API_KEY` as a server environment variable in `.env.local` and in the selected Vercel project. Environment changes require a new deployment. An API key alone does not enable generation: AI orchestration and generation endpoints are still a planned milestone.
 
-This is an internal prototype with sample data. AI generation and live publishing are not implemented. The APIs currently have no application authentication; keep the deployment access restricted if you connect private accounts or a private database.
+This is an internal prototype with sample data. AI generation and live publishing are not implemented. Application APIs require an active authenticated workspace membership. Keep deployment access restricted until Google OAuth and cloud database connectivity are verified.
 
-## Buffer connection
+## Workspace sign-in and Teams
+
+The auth implementation uses Auth.js with Google OpenID Connect. Verified Workspace identities with both an `@i8is.com` email and Google's `hd=i8is.com` claim can join as members. Other verified Google accounts require an unexpired administrator approval. A blocked membership overrides domain admission. Membership is bound to the Google subject ID, and roles/status are checked in MongoDB on every protected request.
+
+Set `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and `AUTH_ADMIN_EMAIL` in the ignored local env file and the intended Vercel environment. The initial admin is explicitly configured as `sameera@i8is.com` in local configuration; there is no first-visitor admin grant. The admin record is created only after successful verified Google sign-in. Only administrators can read or change the Teams directory. The initial administrator and the acting admin's own access are protected from edits.
+
+Create a Google Cloud OAuth **Web application** client. Configure these redirect URIs:
+
+```text
+https://i8is-marketing-os-f7ci.vercel.app/api/auth/callback/google
+http://127.0.0.1:3000/api/auth/callback/google
+http://localhost:3000/api/auth/callback/google
+```
+
+Use an Internal consent audience for I8IS-only access. Invited external Google accounts also require an External audience in Google Cloud, with test-user or publishing settings permitting them. The application requests only `openid email profile`, not Drive or Gmail access. A preview deployment needs its own exact callback URI registered before OAuth can be tested there.
+
+The app login page is `/login`. Dashboard routes and application APIs deny unauthenticated or revoked users; missing config and database failures fail closed. Teams approval records expire after 7 days until accepted, and no invitation emails are sent. Admins share the app login link with approved users. State-changing application endpoints require a same-origin request; Auth.js handles its own OAuth/CSRF protections.
+
+Content queries are now scoped to the authenticated I8IS workspace, and new content cannot override that tenant binding. Existing unscoped content records are excluded; no automatic legacy-data migration is performed.
+
+Keep Vercel deployment protection enabled until OAuth sign-in, admin controls, and cloud database access are verified. Auth code must not be treated as a completed Google login until the real OAuth client is configured and the browser flow succeeds.
+
+### Buffer profile discovery
 
 Set `BUFFER_API_KEY` and `BUFFER_ORGANIZATION_ID` in the ignored `.env.local` file, then restart the local server. For Vercel, set both in the project's environment settings and redeploy. Never put real credentials in `.env.example` or variables prefixed with `NEXT_PUBLIC_`.
 
