@@ -52,6 +52,8 @@ The lockfile includes a PostCSS override for Next.js so it uses the patched Post
 4. For content persistence, set `MONGODB_URI` in Vercel's environment variables to a reachable MongoDB Atlas URI, with database network access configured for the deployment. Do not use a localhost URI on Vercel. Redeploy after changing environment variables.
 5. Deploy. Pages can be deployed without `MONGODB_URI`; `/api/content` requires it at runtime.
 
+Store `OPENAI_API_KEY` as a server environment variable in `.env.local` and in the selected Vercel project. Environment changes require a new deployment. An API key alone does not enable generation: AI orchestration and generation endpoints are still a planned milestone.
+
 This is an internal prototype with sample data. AI generation and live publishing are not implemented. The APIs currently have no application authentication; keep the deployment access restricted if you connect private accounts or a private database.
 
 ## Buffer connection
