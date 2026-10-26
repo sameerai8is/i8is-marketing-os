@@ -6,6 +6,28 @@ import mongoose from "mongoose";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function logStorageFailure(error: unknown) {
+  // Record diagnostic categories only. Raw MongoDB errors can contain URIs,
+  // hostnames, credentials, and query details and must not be logged.
+  const failure = error as {
+    name?: string;
+    code?: string | number;
+    message?: string;
+    reason?: { servers?: Map<string, { error?: { name?: string; code?: string | number } }> };
+  } | null;
+  const message = failure?.message || "";
+  console.error("content.storage.unavailable", JSON.stringify({
+    configured: Boolean(process.env.MONGODB_URI),
+    type: failure?.name || "Unknown",
+    code: failure?.code,
+    authenticationFailure: /authentication|bad auth/i.test(message),
+    networkAccessHint: /IP.*(?:whitelist|access list)|server selection|could not connect/i.test(message),
+    serverErrors: failure?.reason?.servers instanceof Map
+      ? Array.from(failure.reason.servers.values(), server => ({ type: server.error?.name, code: server.error?.code }))
+      : undefined,
+  }));
+}
+
 function unavailable() {
   return NextResponse.json(
     { error: "Content storage is unavailable. Configure MONGODB_URI with a reachable MongoDB database." },
@@ -18,7 +40,8 @@ export async function GET() {
     await dbConnect();
     const items = await ContentItem.find().sort({ scheduledAt: -1 }).limit(50);
     return NextResponse.json(items);
-  } catch {
+  } catch (error) {
+    logStorageFailure(error);
     return unavailable();
   }
 }
@@ -38,6 +61,7 @@ export async function POST(request: Request) {
     if (error instanceof SyntaxError || error instanceof mongoose.Error.ValidationError || error instanceof mongoose.Error.CastError) {
       return NextResponse.json({ error: "Invalid content. Provide title, body, and a supported platform; check field values." }, { status: 400 });
     }
+    logStorageFailure(error);
     return unavailable();
   }
 }
