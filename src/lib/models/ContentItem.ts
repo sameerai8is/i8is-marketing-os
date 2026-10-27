@@ -5,11 +5,12 @@ export interface IContentItem extends Document {
   title: string;
   body: string;
   platform: "linkedin" | "facebook" | "instagram" | "twitter";
-  status: "draft" | "pending_approval" | "scheduled" | "published" | "failed";
+  status: "draft" | "pending_approval" | "approved" | "scheduled" | "published" | "failed";
   scheduledAt?: Date;
   publishedAt?: Date;
   campaignId?: string;
   imageUrl?: string;
+  sourceFacts?: { text: string; source: string }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,8 +18,8 @@ export interface IContentItem extends Document {
 const ContentItemSchema = new Schema<IContentItem>(
   {
     tenantId: { type: String, required: true, index: true },
-    title: { type: String, required: true },
-    body: { type: String, required: true },
+    title: { type: String, required: true, trim: true, maxlength: 200 },
+    body: { type: String, required: true, trim: true, maxlength: 10000 },
     platform: {
       type: String,
       enum: ["linkedin", "facebook", "instagram", "twitter"],
@@ -26,13 +27,14 @@ const ContentItemSchema = new Schema<IContentItem>(
     },
     status: {
       type: String,
-      enum: ["draft", "pending_approval", "scheduled", "published", "failed"],
+      enum: ["draft", "pending_approval", "approved", "scheduled", "published", "failed"],
       default: "draft",
     },
     scheduledAt: Date,
     publishedAt: Date,
     campaignId: String,
     imageUrl: String,
+    sourceFacts: [{ text: String, source: String, _id: false }],
   },
   { timestamps: true }
 );

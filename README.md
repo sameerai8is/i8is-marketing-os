@@ -1,106 +1,78 @@
-# I8IS Marketing OS
+﻿# Orbit by I8IS
 
-Internal autonomous AI marketing operating system for I8IS, with I8IS as the first tenant.
+Internal marketing workspace built with Next.js 15, React 19, TypeScript, Tailwind and MongoDB/Mongoose. I8IS is the first and only onboarded tenant. The product direction is a coordinated multi-agent marketing department; autonomous orchestration is not implemented in this release.
 
-## Product direction
+## Available workflows
 
-A central Marketing Brain will coordinate specialized research, strategy, content, creative, publishing, analytics, and optimization agents. The dashboard and MongoDB data layer are the first prototype milestone.
+- Google Workspace sign-in: verified `i8is.com` staff join as members; the explicitly configured initial admin is bootstrapped on first sign-in.
+- Verified external Google users create pending access requests. They receive a restricted session and a waiting page, with no workspace data until approved.
+- Teams: search/filter/paginate people, approve/decline requests, invite people, renew invitations, change roles, revoke/restore access, copy the login link, and view recent access changes.
+- Invitations are bound to the approved Google email, expire after seven days until accepted, and use optional Resend email. The shared login URL is not a bearer credential. Delivery is reported as provider accepted, failed, or not configured; acceptance by the email API is not proof of delivery.
+- Planner: saved drafts, channel/status filtering, working month/week navigation, editing, deletion, previews, review submission, administrator approval, and simulated scheduling with future-date validation.
+- Company DNA: administrator-reviewed factual claims and references, audience and brand tone. References record administrator review, not automated source verification.
+- Text generation: server-side OpenAI Responses API, reviewed facts required, source references attached to a draft, and human approval required. No autonomous publishing or factual guarantee from the model.
+- Shared goals and review preferences persist in MongoDB. Analytics shows saved-content counts; social engagement metrics are not connected.
+- Buffer: read-only profile discovery behind a provider gateway. No provider publishing mutation exists.
 
-- Ground strategy and generated content in a verified company knowledge base; distinguish verified facts from assumptions and never present invented company facts as verified.
-- Support onboarding with business goals and connected Facebook, Instagram, and LinkedIn accounts.
-- Keep publishing simulated in the prototype. Introduce Buffer as the first publishing adapter behind a provider gateway, leaving room for direct Meta and LinkedIn adapters.
-- I8IS is the first tenant. Content and member API operations are bound to the authenticated I8IS workspace. Additional tenant onboarding and other models still need a complete tenant-isolation design.
-- Add durable background jobs and LangGraph-style orchestration later. Social OAuth will use an application-owned flow, without requiring customer developer apps.
+Campaign orchestration, image/carousel generation, assets, social inbox, automated analytics, durable publishing workers and additional SSO providers remain planned. These screens show their actual availability rather than fabricated sample results.
 
-The current UI uses sample data. Agent orchestration, social publishing OAuth, live publishing adapters, additional tenant onboarding, and verified knowledge workflows are planned capabilities rather than implemented features.
+## Local setup
 
-## Stack
-- Next.js 15 (App Router) + TypeScript + Tailwind
-- MongoDB (via Mongoose)
-- Lucide icons
+Requires Node.js 22.x. Use `npm.cmd`/`npx.cmd` on PowerShell if script execution policy blocks npm.ps1.
 
-## Getting started
-
-```bash
+```sh
 npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Configure ignored `.env.local` using `.env.example` as a placeholder-only reference. Never put real values in tracked files or `NEXT_PUBLIC_` variables.
 
-Requires Node.js 22.x and npm. On Windows PowerShell, use `npm.cmd` if execution policy blocks `npm.ps1`.
+Required for application access:
 
-The sample dashboard pages work without a database. To use `/api/content`, copy `.env.example` to `.env.local` and set `MONGODB_URI` to a running local MongoDB or MongoDB Atlas database. Missing or unreachable storage returns HTTP 503; invalid content requests return HTTP 400. No credentials are needed during the build.
+- `MONGODB_URI`: reachable MongoDB/Atlas database.
+- `AUTH_SECRET`: cryptographically random session secret, at least 32 bytes.
+- `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`: Google OAuth Web application credentials.
+- `AUTH_ADMIN_EMAIL`: explicitly authorized initial administrator, currently `sameera@i8is.com`.
+- Local `AUTH_URL=http://localhost:3000`; production `AUTH_URL` and `APP_URL` must equal the stable HTTPS application origin.
 
-## Production build and local deployment
+Optional integrations:
 
-```bash
-npm ci
-npm run check
-npm start
-```
+- `BUFFER_API_KEY`, `BUFFER_ORGANIZATION_ID`: profile discovery.
+- `OPENAI_API_KEY`: server-owned text generation; `OPENAI_MODEL` defaults to `gpt-4.1-mini`.
+- `RESEND_API_KEY`, `INVITE_FROM_EMAIL`: invitation/approval emails. Sender must be verified in Resend. Without these, admins share the copyable login link.
 
-The production server runs at http://localhost:3000. Use `npm start -- --port 3001` to select another port. `npm run check` runs ESLint, TypeScript, and a production build.
-
-The lockfile includes a PostCSS override for Next.js so it uses the patched PostCSS 8 release. Production dependency auditing (`npm audit --omit=dev`) passes. The full audit still reports findings in the existing Tailwind 3 and ESLint tooling; resolving those requires a separate tooling upgrade.
-
-## Deploy on Vercel
-
-1. Import `sameerai8is/i8is-marketing-os` into Vercel and select the `main` branch.
-2. Keep the root directory as the repository root and the framework as Next.js. `vercel.json` uses `npm ci` and `npm run build`; leave the output directory at its default.
-3. Use Node.js 22.x (also specified in `package.json`).
-4. For content persistence, set `MONGODB_URI` in Vercel's environment variables to a reachable MongoDB Atlas URI, with database network access configured for the deployment. Do not use a localhost URI on Vercel. Redeploy after changing environment variables.
-5. Deploy. Pages can be deployed without `MONGODB_URI`; `/api/content` requires it at runtime.
-
-Store `OPENAI_API_KEY` as a server environment variable in `.env.local` and in the selected Vercel project. Environment changes require a new deployment. An API key alone does not enable generation: AI orchestration and generation endpoints are still a planned milestone.
-
-This is an internal prototype with sample data. AI generation and live publishing are not implemented. Application APIs require an active authenticated workspace membership. Keep deployment access restricted until Google OAuth and cloud database connectivity are verified.
-
-## Workspace sign-in and Teams
-
-The auth implementation uses Auth.js with Google OpenID Connect. Verified Workspace identities with both an `@i8is.com` email and Google's `hd=i8is.com` claim can join as members. Other verified Google accounts require an unexpired administrator approval. A blocked membership overrides domain admission. Membership is bound to the Google subject ID, and roles/status are checked in MongoDB on every protected request.
-
-Set `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and `AUTH_ADMIN_EMAIL` in the ignored local env file and the intended Vercel environment. The initial admin is explicitly configured as `sameera@i8is.com` in local configuration; there is no first-visitor admin grant. The admin record is created only after successful verified Google sign-in. Only administrators can read or change the Teams directory. The initial administrator and the acting admin's own access are protected from edits.
-
-Create a Google Cloud OAuth **Web application** client. Configure these redirect URIs:
+Google OAuth JavaScript origins (no path/trailing slash):
 
 ```text
-https://i8is-marketing-os-f7ci.vercel.app/api/auth/callback/google
-http://127.0.0.1:3000/api/auth/callback/google
-http://localhost:3000/api/auth/callback/google
+http://localhost:3000
+https://i8is-marketing-os-f7ci.vercel.app
 ```
 
-Use an Internal consent audience for I8IS-only access. Invited external Google accounts also require an External audience in Google Cloud, with test-user or publishing settings permitting them. The application requests only `openid email profile`, not Drive or Gmail access. A preview deployment needs its own exact callback URI registered before OAuth can be tested there.
+Google authorized redirect URIs:
 
-The app login page is `/login`. Dashboard routes and application APIs deny unauthenticated or revoked users; missing config and database failures fail closed. Teams approval records expire after 7 days until accepted, and no invitation emails are sent. Admins share the app login link with approved users. State-changing application endpoints require a same-origin request; Auth.js handles its own OAuth/CSRF protections.
+```text
+http://localhost:3000/api/auth/callback/google
+https://i8is-marketing-os-f7ci.vercel.app/api/auth/callback/google
+```
 
-Content queries are now scoped to the authenticated I8IS workspace, and new content cannot override that tenant binding. Existing unscoped content records are excluded; no automatic legacy-data migration is performed.
+The Google OAuth audience must allow external identities if inviting people outside I8IS. Orbit still requires membership approval. Google sign-in already provides Workspace SSO; Microsoft/SAML are not configured.
 
-Keep Vercel deployment protection enabled until OAuth sign-in, admin controls, and cloud database access are verified. Auth code must not be treated as a completed Google login until the real OAuth client is configured and the browser flow succeeds.
+## Verification
 
-### Buffer profile discovery
+```sh
+npm test
+npm run check
+npm run test:integration
+```
 
-Set `BUFFER_API_KEY` and `BUFFER_ORGANIZATION_ID` in the ignored `.env.local` file, then restart the local server. For Vercel, set both in the project's environment settings and redeploy. Never put real credentials in `.env.example` or variables prefixed with `NEXT_PUBLIC_`.
+`check` runs lint, TypeScript and a production build. Integration tests require a completed build plus a MongoDB credential that can create/drop a randomly named disposable test database. They start an isolated server on port 3101, use test-only fixture sessions, and remove the test database in a finally block. They never write live workspace data or send invitation emails/social posts. Set `TEST_LIVE_AI=1` to opt into one paid AI draft generation inside the disposable database. Real Google consent and external email delivery require separate provider/browser checks.
 
-In Settings, use **Check Buffer connection** to discover the configured organization's social profiles and inspect disconnected, locked, and paused statuses. An API key is appropriate for this I8IS-only prototype; customer OAuth is a later milestone.
+## Production deployment
 
-`GET /api/publishing/connection` uses a server-only gateway and a Buffer adapter. The organization binding comes from server configuration, never client input. Credentials and raw upstream errors are excluded from responses. There are no publishing mutations: the gateway reports simulation mode and cannot create, schedule, or publish posts. Adding another tenant requires authenticated tenant lookup and separately scoped credentials before enabling its gateway.
+Import `sameerai8is/i8is-marketing-os` into Vercel, use Node 22 and the default Next.js output. Set server environment variables before deployment, with production URLs as above, and redeploy after env changes. MongoDB Atlas must permit the deployment's connection; working local connectivity does not prove cloud connectivity.
 
-Run `npm test` for adapter request scoping, profile mapping, empty accounts, authentication failures, rate limits, malformed responses, and error redaction. API reference: https://developers.buffer.com/reference.html.
+Release checks: anonymous dashboard requests redirect to login; anonymous data APIs return 401; pending/blocked users cannot read data; admin Teams loads; a real second Google account can request access and be approved; approved posts can be scheduled only in simulation; Buffer metadata is not public.
 
-## Current status
-- First Figma implementation: Orbit navigation, page search, mobile navigation, and the Mission Control overview, using the DM Sans font and the design's navy/lime palette.
-- Mission Control reads Buffer profile health and a snapshot of the latest 50 content records. Agent cards describe the planned workflow; they do not represent running agents.
-- The Mission Control goal prompt saves a draft in this browser's local storage. It does not sync goals to MongoDB or start agent execution.
-- Sidebar links to the seven existing pages; planned modules are marked unavailable.
-- Command Center with strategy overview
-- Content Calendar (month view with sample posts and status colors)
-- Campaign Studio, Company Brain, Creative Studio, Performance Intelligence
-- Mongoose models: ContentItem, Campaign, BrandProfile
-- MongoDB connection helper
+Member, content, settings, audit and rate-limit operations are workspace-scoped. The I8IS workspace, company domain and Buffer credentials are fixed server bindings. All models include tenant ownership, but additional organizations still require an onboarding/credential design. Legacy content without a tenant is excluded; no automatic migration occurs.
 
-## Next steps
-- Wire models to API routes and real data
-- Publishing simulation + Buffer adapter
-- Agent orchestration skeleton (LangGraph)
-- Company website analysis flow
+Security properties: live role/status and Google subject checks on protected requests; PKCE/state/nonce through Auth.js; same-origin mutations; input whitelists; shared database-backed mutation limits; optimistic update conflicts; protected bootstrap administrator. Published/failed statuses cannot be assigned through composer APIs. Editing an approved/scheduled post invalidates approval and removes its schedule. Known limitations: provider access changes are checked at next Google sign-in; existing sessions expire after eight hours unless revoked in Orbit; AI requires human claim review; email delivery webhooks and enterprise SAML are not implemented.

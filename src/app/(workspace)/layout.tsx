@@ -8,7 +8,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   let member;
   try { member = await requireMember(); }
   catch (error) {
-    if (error instanceof AccessError) redirect(`/login?error=${error.code}`);
+    if (error instanceof AccessError) redirect(error.status === 403 ? "/access" : `/login?error=${error.code}`);
     throw error;
   }
   return <AppShell member={member}>{children}</AppShell>;

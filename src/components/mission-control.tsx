@@ -9,7 +9,7 @@ type ContentSnapshot = { pending: number; production: number; published: number 
 const agents = [
   { number: "01", name: "Maya", role: "Research", description: "Discover verified market signals", tone: "green", status: "Planned", detail: "Research will gather market signals and attach sources. Company facts must be verified before they enter a campaign." },
   { number: "02", name: "Dev", role: "Strategy", description: "Turn your direction into a campaign brief", tone: "green", status: "Planned", detail: "Strategy will turn an approved goal and verified research into a measurable campaign brief for your review." },
-  { number: "03", name: "Owen", role: "Content", description: "Prepare channel-specific content for review", tone: "blue", status: "Review first", detail: "Content will adapt approved briefs for each channel. You will be able to review the copy and its factual claims before approval." },
+  { number: "03", name: "Owen", role: "Content", description: "Generate drafts from reviewed company facts", tone: "blue", status: "Drafts", detail: "Open the Planner to generate a text draft from reviewed company facts. Inspect source references, edit the text, and submit it for administrator approval. This is a writing step; autonomous agent orchestration is not enabled." },
   { number: "04", name: "Iris", role: "Publishing", description: "Buffer profiles connected · publishing simulated", tone: "amber", status: "Simulation", detail: "Buffer profile discovery is connected. Creating, scheduling, and publishing posts remain disabled in this prototype." },
 ];
 
@@ -21,6 +21,7 @@ export function MissionControl() {
   const [goal, setGoal] = useState("");
   const [savedGoal, setSavedGoal] = useState("");
   const [goalMessage, setGoalMessage] = useState("");
+  const [settingsVersion, setSettingsVersion] = useState<string | null>(null);
   const [detail, setDetail] = useState<{ title: string; description: string } | null>(null);
   const goalInput = useRef<HTMLTextAreaElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -34,12 +35,10 @@ export function MissionControl() {
       .then(async response => { if (!response.ok) throw new Error(); return response.json(); })
       .then((items: { status: string }[]) => {
         if (!Array.isArray(items)) throw new Error();
-        setSnapshot({ pending: items.filter(item => item.status === "pending_approval").length, production: items.filter(item => ["draft", "pending_approval", "scheduled"].includes(item.status)).length, published: items.filter(item => item.status === "published").length });
+        setSnapshot({ pending: items.filter(item => item.status === "pending_approval").length, production: items.filter(item => ["draft", "pending_approval", "approved", "scheduled"].includes(item.status)).length, published: items.filter(item => item.status === "published").length });
       }).catch(() => { if (!controller.signal.aborted) setContentError(true); });
-    try {
-      const stored = localStorage.getItem("orbit:i8is:marketing-goal");
-      if (stored) { setSavedGoal(stored); setGoal(stored); }
-    } catch { /* A goal can still be edited when browser storage is unavailable. */ }
+    try { localStorage.removeItem("orbit:i8is:marketing-goal"); } catch { /* Legacy device-only drafts are no longer used. */ }
+    fetch("/api/workspace", { signal: controller.signal, cache: "no-store" }).then(async r => { if (!r.ok) throw new Error(); return r.json(); }).then(({ settings }) => { setGoal(settings.marketingGoal); setSavedGoal(settings.marketingGoal); setSettingsVersion(settings.updatedAt || null); }).catch(() => { if (!controller.signal.aborted) setGoalMessage("Workspace goal could not be loaded. Refresh before saving."); });
     return () => controller.abort();
   }, []);
 
@@ -48,15 +47,18 @@ export function MissionControl() {
     dialog.current?.showModal();
   }
 
-  function saveGoal(event: React.FormEvent) {
+  async function saveGoal(event: React.FormEvent) {
     event.preventDefault();
     const value = goal.trim();
     if (!value) { setGoalMessage("Describe the outcome you want to achieve."); goalInput.current?.focus(); return; }
     try {
-      localStorage.setItem("orbit:i8is:marketing-goal", value);
+      const r = await fetch("/api/workspace", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "goal", marketingGoal: value, updatedAt: settingsVersion }) });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Goal could not be saved.");
       setSavedGoal(value);
-      setGoalMessage("Goal saved on this device. Agent execution is not enabled yet.");
-    } catch { setGoalMessage("Your browser could not save this goal. Keep a copy before leaving this page."); }
+      setSettingsVersion(data.settings.updatedAt);
+      setGoalMessage("Goal saved to your workspace. Create a draft in the Planner to start review.");
+    } catch (e) { setGoalMessage(e instanceof Error ? e.message : "Your goal could not be saved."); }
   }
 
   const supported = ["linkedin", "instagram", "facebook"];
@@ -74,7 +76,7 @@ export function MissionControl() {
         <span className="orbit-badge mission-director-label"><span aria-hidden="true">◉</span> AI Director</span>
         <h2 id="director-heading">Your next move starts with a goal.</h2>
         <p>{savedGoal ? `Your direction: ${savedGoal}` : "Set the direction for I8IS. Turn verified research into thoughtful content and campaigns you approve."}</p>
-        <div className="mission-director-footer"><button className="orbit-button orbit-button-lime" onClick={() => openDetail("From a goal to a campaign", "Start with your business goal. The planned workflow moves through research, strategy, content, creative, and human approval before publishing. This prototype connects your Buffer profiles and stores a goal on this device; it does not run agents or publish posts.")}>Explore the workflow <ArrowRight size={15} /></button><span>Human approval comes first</span></div>
+        <div className="mission-director-footer"><button className="orbit-button orbit-button-lime" onClick={() => openDetail("From a goal to a reviewed draft", "Save a shared goal, maintain reviewed company facts, and create a draft in the Planner. Edit and preview it, submit it for approval, then save a simulated schedule. Autonomous research, campaign orchestration, and live publishing are not enabled.")}>Explore the workflow <ArrowRight size={15} /></button><span>Human approval comes first</span></div>
       </section>
 
       <section className="mission-health orbit-surface" aria-labelledby="health-heading" aria-busy={!connection && !connectionError}>
@@ -110,10 +112,10 @@ export function MissionControl() {
         <h2 id="prompt-heading">What should we achieve next?</h2>
         <p>Try: Make us visible to manufacturing<br className="mission-example-break" /> leaders across Ontario this November.</p>
         <form onSubmit={saveGoal} className="mission-goal-form"><label htmlFor="marketing-goal" className="sr-only">Your marketing goal</label><textarea ref={goalInput} id="marketing-goal" value={goal} onChange={event => { setGoal(event.target.value); setGoalMessage(""); }} placeholder="Describe a goal for your marketing team…" maxLength={1000} rows={3} required /><button type="submit" aria-label="Save marketing goal">{goal && goal === savedGoal ? <Check size={17} /> : <ArrowUpRight size={17} />}</button></form>
-        <p className="mission-goal-message" role="status">{goalMessage || (savedGoal ? "Draft goal saved on this device" : "Save a direction for your next campaign.")}</p>
+        <p className="mission-goal-message" role="status">{goalMessage || (savedGoal ? "Goal saved to your shared workspace" : "Save a direction for your next campaign.")}</p>
       </section>
     </div>
-    <p className="mission-data-note">{contentError ? "Content overview is unavailable. Check the database connection." : "Content overview reflects the latest 50 records. Agent workflow is a preview; publishing is simulated."}</p>
+    <p className="mission-data-note">{contentError ? "Content overview is unavailable. Check the database connection." : "Content overview reflects up to 500 recently updated records. Agent orchestration is planned; publishing is simulated."}</p>
 
     <dialog ref={dialog} className="orbit-detail-dialog" aria-labelledby="detail-heading" onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
       <button className="orbit-dialog-close" onClick={() => dialog.current?.close()} aria-label="Close details"><X size={20} /></button><span className="orbit-badge orbit-badge-blue">Workflow preview</span><h2 id="detail-heading">{detail?.title}</h2><p>{detail?.description}</p><Link href="/campaigns" onClick={() => dialog.current?.close()} className="orbit-button orbit-button-dark">Open Campaign Studio <ArrowRight size={15} /></Link>

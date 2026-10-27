@@ -5,11 +5,12 @@ export interface IWorkspaceMember {
   email: string;
   name: string;
   role: "admin" | "member";
-  status: "invited" | "active" | "blocked";
+  status: "pending" | "invited" | "active" | "blocked";
   googleSubject?: string;
   inviteExpiresAt?: Date;
   invitedBy?: string;
   lastSignInAt?: Date;
+  emailStatus?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -19,11 +20,12 @@ const schema = new Schema<IWorkspaceMember>({
   email: { type: String, required: true, lowercase: true, trim: true },
   name: { type: String, default: "", maxlength: 200 },
   role: { type: String, enum: ["admin", "member"], default: "member", required: true },
-  status: { type: String, enum: ["invited", "active", "blocked"], required: true },
+  status: { type: String, enum: ["pending", "invited", "active", "blocked"], required: true },
   googleSubject: { type: String, select: false },
   inviteExpiresAt: Date,
   invitedBy: String,
   lastSignInAt: Date,
+  emailStatus: { type: String, enum: ["accepted", "failed", "not_configured"] },
 }, { timestamps: true });
 schema.index({ tenantId: 1, email: 1 }, { unique: true });
 schema.index({ tenantId: 1, googleSubject: 1 }, { unique: true, partialFilterExpression: { googleSubject: { $type: "string" } } });

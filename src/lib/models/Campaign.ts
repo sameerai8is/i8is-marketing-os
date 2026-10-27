@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ICampaign extends Document {
+  tenantId: string;
   name: string;
   objective: string;
   targetAudience: string;
@@ -15,6 +16,7 @@ export interface ICampaign extends Document {
 
 const CampaignSchema = new Schema<ICampaign>(
   {
+    tenantId: { type: String, required: true, index: true },
     name: { type: String, required: true },
     objective: { type: String, required: true },
     targetAudience: String,

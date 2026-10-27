@@ -1,6 +1,7 @@
 import "server-only";
 import dbConnect from "./mongodb";
 import { WorkspaceMember } from "./models/WorkspaceMember";
+import { AuditEvent } from "./models/AuditEvent";
 import { isCompanyIdentity, maySignIn, normalizeEmail, WORKSPACE_ID } from "./access-policy";
 
 export async function admitGoogleIdentity(profile: { email?: unknown; email_verified?: unknown; hd?: unknown; sub?: unknown; name?: unknown }): Promise<boolean> {
@@ -12,19 +13,31 @@ export async function admitGoogleIdentity(profile: { email?: unknown; email_veri
   await dbConnect();
   await WorkspaceMember.init();
   let member = await WorkspaceMember.findOne({ tenantId: WORKSPACE_ID, email }).select("+googleSubject");
-  if (!maySignIn({ verified: true, companyIdentity: isCompanyIdentity(profile), status: member?.status, inviteExpiresAt: member?.inviteExpiresAt })) return false;
   if (member?.googleSubject && member.googleSubject !== profile.sub) return false;
+  if (member?.status === "blocked") return false;
   const name = typeof profile.name === "string" ? profile.name.slice(0, 200) : "";
+  const admitted = maySignIn({ verified: true, companyIdentity: isCompanyIdentity(profile), status: member?.status, inviteExpiresAt: member?.inviteExpiresAt });
   if (!member) {
     // Concurrent first sign-ins converge on the unique tenant/email record.
     try {
-      member = await WorkspaceMember.create({ tenantId: WORKSPACE_ID, email, name, role: email === adminEmail ? "admin" : "member", status: "active", googleSubject: profile.sub, lastSignInAt: new Date() });
+      member = await WorkspaceMember.create({ tenantId: WORKSPACE_ID, email, name, role: email === adminEmail && admitted ? "admin" : "member", status: admitted ? "active" : "pending", googleSubject: profile.sub, lastSignInAt: new Date() });
+      if (!admitted) await AuditEvent.create({ tenantId: WORKSPACE_ID, actor: email, action: "access.requested", target: email });
     } catch (error) {
       if ((error as { code?: number }).code !== 11000) throw error;
       member = await WorkspaceMember.findOne({ tenantId: WORKSPACE_ID, email }).select("+googleSubject");
-      if (!member || member.status !== "active" || member.googleSubject !== profile.sub) return false;
+      if (!member || !["active", "pending"].includes(member.status) || member.googleSubject !== profile.sub) return false;
     }
     return true;
+  }
+  // A verified identity may hold a restricted session while waiting for approval.
+  // Protected APIs still require live active membership on every request.
+  if (!admitted) {
+    if (member.status === "pending") return true;
+    if (member.status === "invited") {
+      const result = await WorkspaceMember.updateOne({ _id: member._id, status: "invited", updatedAt: member.updatedAt }, { $set: { status: "pending", googleSubject: profile.sub, name }, $unset: { inviteExpiresAt: 1 } });
+      return result.modifiedCount === 1;
+    }
+    return false;
   }
   const result = await WorkspaceMember.updateOne({ _id: member._id, tenantId: WORKSPACE_ID, status: member.status, updatedAt: member.updatedAt }, {
     $set: { name, status: "active", googleSubject: profile.sub, lastSignInAt: new Date() },

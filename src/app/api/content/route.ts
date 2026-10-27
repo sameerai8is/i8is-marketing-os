@@ -3,6 +3,8 @@ import { ContentItem } from "@/lib/models/ContentItem";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { accessErrorResponse, requireMember, requireSameOrigin } from "@/lib/authorization";
+import { ContentError, draftFields, initialStatus } from "@/lib/content-policy";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,7 +42,7 @@ export async function GET() {
   try {
     const member = await requireMember();
     await dbConnect();
-    const items = await ContentItem.find({ tenantId: member.tenantId }).sort({ scheduledAt: -1 }).limit(50);
+    const items = await ContentItem.find({ tenantId: member.tenantId }).sort({ updatedAt: -1, _id: -1 }).limit(500);
     return NextResponse.json(items, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     const denied = accessErrorResponse(error);
@@ -54,11 +56,12 @@ export async function POST(request: Request) {
   try {
     requireSameOrigin(request);
     const member = await requireMember();
+    await rateLimit(member.id, "content-write");
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "Expected a content object" }, { status: 400 });
     }
-    const candidate = new ContentItem({ ...body, tenantId: member.tenantId });
+    const candidate = new ContentItem({ ...draftFields(body), status: initialStatus(body.status), tenantId: member.tenantId });
     await candidate.validate();
     await dbConnect();
     const item = await candidate.save();
@@ -66,6 +69,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const denied = accessErrorResponse(error);
     if (denied) return denied;
+    if (error instanceof ContentError) return NextResponse.json({ error: error.message }, { status: 400 });
     if (error instanceof SyntaxError || error instanceof mongoose.Error.ValidationError || error instanceof mongoose.Error.CastError) {
       return NextResponse.json({ error: "Invalid content. Provide title, body, and a supported platform; check field values." }, { status: 400 });
     }

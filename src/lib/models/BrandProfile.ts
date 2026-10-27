@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IBrandProfile extends Document {
+  tenantId: string;
   companyName: string;
   description: string;
   targetAudience: string;
@@ -15,6 +16,7 @@ export interface IBrandProfile extends Document {
 
 const BrandProfileSchema = new Schema<IBrandProfile>(
   {
+    tenantId: { type: String, required: true, index: true },
     companyName: { type: String, required: true, default: "I8IS" },
     description: String,
     targetAudience: String,

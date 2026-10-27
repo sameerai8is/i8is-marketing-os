@@ -14,7 +14,7 @@ export function AppShell({ children, member }: { children: React.ReactNode; memb
   const menu = useRef<HTMLDialogElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const current = workspacePages.find(page => page.href === pathname)?.label || "Workspace";
-  const results = workspacePages.filter(page => page.label.toLowerCase().includes(query.toLowerCase()));
+  const results = workspacePages.filter(page => (member.role === "admin" || page.href !== "/team") && page.label.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {
     function shortcuts(event: KeyboardEvent) {

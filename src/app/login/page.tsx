@@ -20,9 +20,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <div className="orbit-login-brand"><span aria-hidden="true">✳</span><strong>orbit</strong><small>by I8IS</small></div>
       <span className="orbit-badge orbit-badge-green">I8IS workspace</span>
       <h1>Your marketing team.<br />One shared workspace.</h1>
-      <p>Sign in with your Google Workspace account. Verified <strong>@i8is.com</strong> staff can join automatically.</p>
+      <p>Sign in with Google to join Orbit. Verified <strong>@i8is.com</strong> staff join automatically. Other accounts can request access for an administrator to approve.</p>
       {(error && error !== "SIGN_IN_REQUIRED") || !configured ? <p className="orbit-login-alert" role="alert">{!configured ? messages.Configuration : messages[error || ""] || "Sign-in could not be completed. Please try again."}</p> : null}
-      <form action={async () => { "use server"; if (authConfigured()) await signIn("google", { redirectTo: "/" }); }}>
+      <form action={async () => { "use server"; if (authConfigured()) await signIn("google", { redirectTo: "/access" }); }}>
         <button disabled={!configured} className="orbit-button orbit-button-dark orbit-login-submit"><span aria-hidden="true">G</span> Continue with Google</button>
       </form>
       {session?.user?.email && <div className="orbit-login-current"><p>Signed in as {session.user.email}</p><form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}><button className="orbit-text-button">Use a different account</button></form></div>}
