@@ -13,6 +13,7 @@ Internal marketing workspace built with Next.js 15, React 19, TypeScript, Tailwi
 - Text generation: server-side OpenAI Responses API, reviewed facts required, source references attached to a draft, and human approval required. No autonomous publishing or factual guarantee from the model.
 - Shared goals and review preferences persist in MongoDB. Analytics shows saved-content counts; social engagement metrics are not connected.
 - Buffer: read-only profile discovery behind a provider gateway. No provider publishing mutation exists.
+- Discover: administrator-started website and competitor research through OpenAI web search, with shared source links, candidate competitors, suggested marketing experiments, and individually reviewed company claims. Approved claims are appended to Company DNA; experiments open as Planner briefs. Research never automatically changes verified facts or publishes posts.
 - Asset Library: authenticated file uploads, private previews/downloads, folders/tags/search, alt text, approval, and Google Drive file/folder references. Attach up to ten images, videos or PDFs to a draft, order them, preview them and see thumbnails in the planner. Assets must be approved before post review/scheduling.
 
 Campaign orchestration, AI image/carousel generation, social inbox, automated analytics, durable publishing workers and additional SSO providers remain planned. These screens show their actual availability rather than fabricated sample results.
@@ -26,6 +27,14 @@ Files are stored in MongoDB GridFS, with 1 MiB upload chunks and streamed downlo
 Drive links preserve Google's permissions. Individual publicly downloadable files can be imported into Orbit; private files remain references, or users can download them in Drive and upload a copy. No Drive OAuth, automatic folder sync, or permission changes are implemented. Native Docs/Slides/Sheets must be exported to a supported file before attachment. Deleting a reference/import in Orbit never deletes the Google original. Orbit copies are readable by active members of the workspace.
 
 Post previews show media order rather than a guaranteed social-channel rendering. Scheduling remains simulated. Channel-specific media validation and delivery through Buffer require the future publishing adapter; these private file URLs are not publicly accessible delivery URLs. For larger libraries, move bytes to object storage with signed uploads/downloads and retain the asset metadata/reference layer.
+
+## Website and competitor research
+
+Open **Discover**, enter the company's public HTTPS website and optional market/geography, and start research as an administrator. Orbit uses the existing `OPENAI_API_KEY` and hosted web search, with `OPENAI_RESEARCH_MODEL` defaulting to `gpt-4.1-mini`. A run incurs search/model usage. Only public website details and the workspace marketing goal are sent; no browser cookies, private Drive files or application credentials are supplied to research.
+
+Research runs in the provider's background mode with stored responses; the Discover page polls and collects the final result. Keep the page open or return as an admin to resume collection. This is user-triggered research, not a periodic crawler or autonomous background worker. One latest report is retained per workspace. Competing starts are rejected, and abandoned runs can be replaced after 15 minutes. Source URLs must occur in provider search/citation metadata, company claims must cite the company's domain, and competitor evidence must cite its proposed official domain. These checks validate provenance, not whether a claim or competitive relationship is true. Source coverage can be incomplete or pages inaccessible; the report labels analysis, hypotheses and evidence gaps.
+
+Review each company claim and its source before adding it to Company DNA. Approval is administrator-only, version checked and additive. No competitor claims become company facts. Suggested experiments open as editable AI post prompts and still use the existing reviewed-fact generation and human approval workflow. Set `TEST_LIVE_RESEARCH=1` for a paid website/competitor integration run in the disposable test database.
 
 ## Local setup
 

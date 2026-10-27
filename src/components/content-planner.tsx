@@ -20,6 +20,8 @@ export function ContentPlanner({ initialItems, initialError, admin }: { initialI
   const [attachments, setAttachments] = useState<LibraryAsset[]>([]), [picking, setPicking] = useState(false);
   const searchParams = useSearchParams(), initialAsset = searchParams.get("asset");
   const [prompt, setPrompt] = useState("");
+  const initialBrief = searchParams.get("brief");
+  useEffect(() => { if (!initialBrief) return; setSelected(null); setTitle(""); setBody(""); setPlatform("linkedin"); setAttachments([]); setScheduledAt(""); setPrompt(initialBrief.slice(0, 1000)); editor.current?.showModal(); }, [initialBrief]);
   useEffect(() => {
     if (!initialAsset) return;
     const controller = new AbortController();

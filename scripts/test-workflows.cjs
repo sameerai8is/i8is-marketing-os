@@ -160,6 +160,7 @@ require('@next/env').loadEnvConfig(process.cwd());
     settings=await (await check('admin autonomy choice persists','/api/workspace',200,patch({action:'autonomy',autonomy:'managed',updatedAt:settings.updatedAt}),ownerCookie)).json();assert.equal(settings.settings.autonomy,'managed');
     const shared=await (await check('another member reads persisted shared goal','/api/workspace',200,{},staffCookie)).json();assert.equal(shared.settings.marketingGoal,'A real shared goal');
     await require('./asset-workflow-checks.cjs')({ check, db, base, ownerCookie, regularCookie, mutation, patch, fixture, cookie });
+    await require('./research-workflow-checks.cjs')({ check, db, ownerCookie, regularCookie, mutation, patch });
     if (process.env.TEST_LIVE_AI === '1') {
       const generated=await (await check('live AI saves a source-referenced draft','/api/content/generate',201,mutation({prompt:'Introduce what this test company does. Avoid any extra claims.',platform:'linkedin'}),regularCookie)).json();
       assert.equal(generated.status,'draft');assert.ok(generated.sourceFacts.length);console.log('PASS generated output is draft-only with references');

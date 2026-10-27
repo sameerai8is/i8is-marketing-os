@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 export const workspacePages = [
   { href: "/", label: "Overview" },
   { href: "/calendar", label: "Planner" },
+  { href: "/research", label: "Website and competitor research" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/creative", label: "Creative lab" },
   { href: "/assets", label: "Asset library" },
@@ -19,7 +20,7 @@ const navGroups = [
   [
     { glyph: "◫", label: "Overview", href: "/" },
     { glyph: "◉", label: "AI workforce", href: "/#workforce" },
-    { glyph: "⌕", label: "Discover", href: null },
+    { glyph: "⌕", label: "Discover", href: "/research" },
     { glyph: "↗", label: "Strategy", href: null },
   ],
   [
