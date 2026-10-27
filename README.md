@@ -13,8 +13,19 @@ Internal marketing workspace built with Next.js 15, React 19, TypeScript, Tailwi
 - Text generation: server-side OpenAI Responses API, reviewed facts required, source references attached to a draft, and human approval required. No autonomous publishing or factual guarantee from the model.
 - Shared goals and review preferences persist in MongoDB. Analytics shows saved-content counts; social engagement metrics are not connected.
 - Buffer: read-only profile discovery behind a provider gateway. No provider publishing mutation exists.
+- Asset Library: authenticated file uploads, private previews/downloads, folders/tags/search, alt text, approval, and Google Drive file/folder references. Attach up to ten images, videos or PDFs to a draft, order them, preview them and see thumbnails in the planner. Assets must be approved before post review/scheduling.
 
-Campaign orchestration, image/carousel generation, assets, social inbox, automated analytics, durable publishing workers and additional SSO providers remain planned. These screens show their actual availability rather than fabricated sample results.
+Campaign orchestration, AI image/carousel generation, social inbox, automated analytics, durable publishing workers and additional SSO providers remain planned. These screens show their actual availability rather than fabricated sample results.
+
+## Working with brand assets
+
+Open **Assets** in the sidebar. Upload files or save a Google Drive file/folder link. Use **Use in a post** to start a draft, or **Choose / upload assets** inside the post composer. Administrators approve assets; any active workspace member can upload and use them. Owners/admins can change metadata or delete unused assets. Files referenced by posts cannot be deleted.
+
+Files are stored in MongoDB GridFS, with 1 MiB upload chunks and streamed downloads, so no additional storage credential is needed. Current prototype limits: 25 MiB per file, 100 MiB reserved/uploaded files per workspace, 1,000 entries, and images up to 40 megapixels. Supported media: PNG, JPEG, WebP, GIF, AVIF, MP4/WebM and PDF. SVG, font and ZIP source files are download-only and cannot be attached to posts. File signatures are checked; image previews are generated server-side. This is not a malware scanning service. Unfinished uploads expire after an hour and their reservation is reclaimed on the next upload/import; temporary chunks also have a database TTL.
+
+Drive links preserve Google's permissions. Individual publicly downloadable files can be imported into Orbit; private files remain references, or users can download them in Drive and upload a copy. No Drive OAuth, automatic folder sync, or permission changes are implemented. Native Docs/Slides/Sheets must be exported to a supported file before attachment. Deleting a reference/import in Orbit never deletes the Google original. Orbit copies are readable by active members of the workspace.
+
+Post previews show media order rather than a guaranteed social-channel rendering. Scheduling remains simulated. Channel-specific media validation and delivery through Buffer require the future publishing adapter; these private file URLs are not publicly accessible delivery URLs. For larger libraries, move bytes to object storage with signed uploads/downloads and retain the asset metadata/reference layer.
 
 ## Local setup
 
@@ -65,7 +76,7 @@ npm run check
 npm run test:integration
 ```
 
-`check` runs lint, TypeScript and a production build. Integration tests require a completed build plus a MongoDB credential that can create/drop a randomly named disposable test database. They start an isolated server on port 3101, use test-only fixture sessions, and remove the test database in a finally block. They never write live workspace data or send invitation emails/social posts. Set `TEST_LIVE_AI=1` to opt into one paid AI draft generation inside the disposable database. Real Google consent and external email delivery require separate provider/browser checks.
+`check` runs lint, TypeScript and a production build. Integration tests require a completed build plus a MongoDB credential that can create/drop a randomly named disposable test database. They start an isolated server on port 3101, use test-only fixture sessions, and remove the test database in a finally block. They exercise asset uploads, byte/range integrity, private downloads, invalid formats, permissions, approvals, post attachments, Drive references and quota cleanup. They never write live workspace data or send invitation emails/social posts. Set `TEST_LIVE_AI=1` to opt into one paid AI draft generation inside the disposable database. Real Google consent, real Drive download permissions and external email delivery require separate provider/browser checks.
 
 ## Production deployment
 

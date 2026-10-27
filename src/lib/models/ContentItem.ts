@@ -11,6 +11,7 @@ export interface IContentItem extends Document {
   campaignId?: string;
   imageUrl?: string;
   sourceFacts?: { text: string; source: string }[];
+  assetIds?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,11 +36,13 @@ const ContentItemSchema = new Schema<IContentItem>(
     campaignId: String,
     imageUrl: String,
     sourceFacts: [{ text: String, source: String, _id: false }],
+    assetIds: { type: [String], default: [] },
   },
   { timestamps: true }
 );
 
 ContentItemSchema.index({ tenantId: 1, scheduledAt: -1 });
+ContentItemSchema.index({ tenantId: 1, assetIds: 1 });
 
 export const ContentItem: Model<IContentItem> =
   mongoose.models.ContentItem || mongoose.model<IContentItem>("ContentItem", ContentItemSchema);

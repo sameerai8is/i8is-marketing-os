@@ -5,6 +5,9 @@ import mongoose from "mongoose";
 import { accessErrorResponse, requireMember, requireSameOrigin } from "@/lib/authorization";
 import { ContentError, draftFields, initialStatus } from "@/lib/content-policy";
 import { rateLimit } from "@/lib/rate-limit";
+import { AssetError, attachmentIds } from "@/lib/asset-policy";
+import { withAssetLock } from "@/lib/asset-lock";
+import { postsWithAssets, validateAssetReferences } from "@/lib/asset-storage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,7 +46,7 @@ export async function GET() {
     const member = await requireMember();
     await dbConnect();
     const items = await ContentItem.find({ tenantId: member.tenantId }).sort({ updatedAt: -1, _id: -1 }).limit(500);
-    return NextResponse.json(items, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json(await postsWithAssets(items, member.tenantId), { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
     const denied = accessErrorResponse(error);
     if (denied) return denied;
@@ -61,14 +64,19 @@ export async function POST(request: Request) {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "Expected a content object" }, { status: 400 });
     }
-    const candidate = new ContentItem({ ...draftFields(body), status: initialStatus(body.status), tenantId: member.tenantId });
+    const ids = attachmentIds(body.assetIds);
+    const candidate = new ContentItem({ ...draftFields(body), status: initialStatus(body.status), assetIds: ids, tenantId: member.tenantId });
     await candidate.validate();
     await dbConnect();
-    const item = await candidate.save();
-    return NextResponse.json(item, { status: 201 });
+    const item = await withAssetLock(member.tenantId, async () => {
+      await validateAssetReferences(member.tenantId, ids, candidate.status !== "draft");
+      return candidate.save();
+    });
+    return NextResponse.json((await postsWithAssets([item], member.tenantId))[0], { status: 201 });
   } catch (error) {
     const denied = accessErrorResponse(error);
     if (denied) return denied;
+    if (error instanceof AssetError) return NextResponse.json({ error: error.message }, { status: error.status });
     if (error instanceof ContentError) return NextResponse.json({ error: error.message }, { status: 400 });
     if (error instanceof SyntaxError || error instanceof mongoose.Error.ValidationError || error instanceof mongoose.Error.CastError) {
       return NextResponse.json({ error: "Invalid content. Provide title, body, and a supported platform; check field values." }, { status: 400 });
