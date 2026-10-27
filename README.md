@@ -9,6 +9,7 @@ Internal marketing workspace built with Next.js 15, React 19, TypeScript, Tailwi
 - Teams: search/filter/paginate people, approve/decline requests, invite people, renew invitations, change roles, revoke/restore access, copy the login link, and view recent access changes.
 - Invitations are bound to the approved Google email, expire after seven days until accepted, and use optional Resend email. The shared login URL is not a bearer credential. Delivery is reported as provider accepted, failed, or not configured; acceptance by the email API is not proof of delivery.
 - Planner: saved drafts, channel/status filtering, working month/week navigation, editing, deletion, previews, review submission, administrator approval, and simulated scheduling with future-date validation.
+- Responsive workspace: phone agenda for scheduled posts, fluid tablet/desktop calendar, stacked member details on phones, tablet navigation drawer, and scrollable composers/asset pickers with touch-sized controls. Desktop table/calendar views retain their full layout.
 - Company DNA: administrator-reviewed factual claims and references, audience and brand tone. References record administrator review, not automated source verification.
 - Text generation: server-side OpenAI Responses API, reviewed facts required, source references attached to a draft, and human approval required. No autonomous publishing or factual guarantee from the model.
 - Shared goals and review preferences persist in MongoDB. Analytics shows saved-content counts; social engagement metrics are not connected.

@@ -17,6 +17,9 @@ export function AppShell({ children, member }: { children: React.ReactNode; memb
   const results = workspacePages.filter(page => (member.role === "admin" || page.href !== "/team") && page.label.toLowerCase().includes(query.toLowerCase()));
 
   useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1025px)");
+    const closeMobileMenu = () => { if (desktop.matches) menu.current?.close(); };
+    desktop.addEventListener("change", closeMobileMenu);
     function shortcuts(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
@@ -25,7 +28,7 @@ export function AppShell({ children, member }: { children: React.ReactNode; memb
       if (event.key === "Escape") setSearching(false);
     }
     window.addEventListener("keydown", shortcuts);
-    return () => window.removeEventListener("keydown", shortcuts);
+    return () => { window.removeEventListener("keydown", shortcuts); desktop.removeEventListener("change", closeMobileMenu); };
   }, []);
 
   return <div className="orbit-shell">
@@ -38,7 +41,7 @@ export function AppShell({ children, member }: { children: React.ReactNode; memb
     <div className="orbit-main-shell">
       <header className="orbit-topbar">
         <button className="orbit-menu-toggle" onClick={() => menu.current?.showModal()} aria-label="Open navigation"><Menu size={20} /></button>
-        <p className="orbit-breadcrumb">Workspace <span>/</span> {current}</p>
+        <p className="orbit-breadcrumb" title={`Workspace / ${current}`}>Workspace <span>/</span> {current}</p>
         <div className="orbit-search" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setSearching(false); }}>
           <button className="orbit-search-toggle" aria-label="Search workspace" aria-expanded={searching} aria-controls="workspace-search-results" onClick={() => search.current?.focus()}><Search size={14} aria-hidden="true" /></button>
           <input ref={search} type="search" aria-label="Search workspace pages" placeholder="Search everything" value={query} onChange={event => { setQuery(event.target.value); setSearching(true); }} onFocus={() => setSearching(true)} aria-controls="workspace-search-results" />

@@ -308,7 +308,7 @@ a.orbit-nav-item:hover { background: #17243a; color: white; }
 .orbit-post-preview small, .orbit-post-preview strong { display: block; margin-bottom: 10px; }
 .orbit-post-preview p { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.6; }
 .orbit-calendar-scroll { overflow-x: auto; }
-.orbit-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(100px, 1fr)); min-width: 750px; }
+.orbit-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-width: 0; }
 .orbit-calendar-heading { padding: 12px; font-size: 12px; color: var(--orbit-muted); }
 .orbit-calendar-day { min-height: 120px; border-top: 1px solid var(--orbit-line); border-right: 1px solid var(--orbit-line); padding: 8px; font-size: 12px; }
 .orbit-calendar-day.is-outside { background: #f8fafc; color: var(--orbit-muted); }
@@ -365,3 +365,99 @@ a.orbit-nav-item:hover { background: #17243a; color: white; }
 @media (max-width: 600px) { .orbit-asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .orbit-asset-card-body { padding: 10px; } .orbit-asset-visual { height: 125px; } .orbit-asset-card-body .orbit-badge { padding: 4px 6px; font-size: 9px; } .orbit-asset-picker-dialog { padding: 16px; } }
 @media (max-width: 800px) { .orbit-team { padding: 28px 20px; } }
 @media (max-width: 520px) { .orbit-login-card { padding: 28px 24px; } .orbit-login h1 { font-size: 29px; } .orbit-team { padding: 24px 16px; } .orbit-team-intro, .orbit-team-invite, .orbit-team-list { padding: 20px 16px; } }
+
+/* Keep content intrinsic widths inside the workspace, including long URLs. */
+.orbit-main, .orbit-surface, .mission-header > *, .orbit-composer-form > *, .orbit-fact, .orbit-fact > *, .orbit-toolbar > *, .orbit-asset-card-body, .orbit-attachment-list article > div { min-width: 0; }
+.orbit-main { overflow-wrap: anywhere; }
+.orbit-breadcrumb { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.orbit-search { flex-shrink: 0; }
+.orbit-search-results a { gap: 12px; overflow-wrap: anywhere; }
+.orbit-search-results a span { flex-shrink: 0; }
+.orbit-toolbar > input, .orbit-toolbar > select { max-width: 100%; }
+.orbit-composer-form input, .orbit-composer-form textarea, .orbit-composer-form select { min-width: 0; max-width: 100%; }
+.orbit-composer-form input[type="checkbox"] { width: 20px; height: 20px; min-height: 20px; padding: 0; flex: 0 0 20px; }
+.orbit-composer-form label.orbit-toolbar { flex-wrap: nowrap; align-items: flex-start; line-height: 22px; }
+.orbit-composer, .orbit-asset-picker-dialog, .orbit-detail-dialog { overscroll-behavior: contain; max-height: calc(100dvh - 24px); }
+.orbit-detail-dialog { overflow-y: auto; }
+body:has(dialog[open]) { overflow: hidden; }
+.orbit-mobile-menu { max-width: calc(100vw - 48px); }
+.orbit-mobile-menu .orbit-sidebar { width: 100%; padding-bottom: max(25px, env(safe-area-inset-bottom)); }
+.orbit-calendar-agenda { display: none; }
+.orbit-team td { overflow-wrap: anywhere; }
+.orbit-team td select { max-width: 100%; }
+.orbit-asset-picker-footer { gap: 16px; padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+.orbit-post-media { grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); }
+.orbit-attachment-list img, .orbit-attachment-type { flex-shrink: 0; }
+
+@media (max-width: 1150px) {
+  .orbit-topbar { gap: 14px; }
+  .orbit-sandbox { display: none; }
+}
+@media (max-width: 1024px) {
+  .orbit-desktop-nav { display: none; }
+  .orbit-main-shell { margin-left: 0; }
+  .orbit-menu-toggle { display: grid; place-items: center; flex-shrink: 0; }
+  .orbit-skip-link { left: 16px; }
+  .orbit-nav-item { min-height: 44px; }
+}
+@media (max-width: 640px) {
+  .orbit-topbar { position: relative; padding-inline: 12px; gap: 8px; }
+  .orbit-menu-toggle, .orbit-search-toggle, .orbit-menu-close, .orbit-user-avatar { min-width: 44px; min-height: 44px; }
+  .orbit-menu-close { top: 18px; right: 6px; }
+  .orbit-user-avatar { font-size: 12px; }
+  .orbit-search { width: 44px; }
+  .orbit-search input { width: 0; position: absolute; opacity: 0; padding: 0; }
+  .orbit-search:focus-within { position: absolute; left: 60px; right: 60px; width: auto; z-index: 50; background: white; }
+  .orbit-search:focus-within input { position: static; width: 100%; opacity: 1; padding-block: 10px; }
+  .orbit-search kbd { display: none; }
+  .orbit-search-results, .orbit-search:focus-within .orbit-search-results { left: -48px; right: -48px; min-width: 0; max-height: 65dvh; overflow-y: auto; }
+  .mission-header { flex-direction: column; align-items: stretch; gap: 16px; min-height: 0; }
+  .mission-header h1 { font-size: 27px; line-height: 35px; letter-spacing: -.7px; }
+  .mission-header > .orbit-button, .mission-header > .orbit-toolbar { width: 100%; }
+  .mission-header > .orbit-toolbar > .orbit-button { flex: 1 1 130px; }
+  .orbit-button { min-height: 44px; padding: 11px 14px; text-align: center; }
+  .orbit-text-button { min-height: 44px; display: inline-flex; align-items: center; padding-block: 10px; text-align: left; }
+  .orbit-team input:not([type="checkbox"]), .orbit-team select, .orbit-composer-form input:not([type="checkbox"]), .orbit-composer-form textarea, .orbit-composer-form select, .orbit-search input, .mission-goal-form textarea { font-size: 16px; }
+  .orbit-team { padding: 24px 16px; }
+  .orbit-team > .orbit-surface, .orbit-team > div > .orbit-surface { padding: 20px 16px; }
+  .orbit-toolbar { gap: 8px; }
+  .orbit-toolbar > input, .orbit-toolbar > select { flex: 1 1 100%; width: 100%; min-width: 0; }
+  .orbit-team-invite form > label, .orbit-team-invite label:first-child, .orbit-team-invite form > button { flex: 1 1 100%; width: 100%; min-width: 0; }
+  .orbit-composer, .orbit-asset-picker-dialog { width: calc(100vw - 24px); padding: 20px 16px; border-radius: 16px; }
+  .orbit-composer-form { gap: 16px; margin-top: 20px; }
+  .orbit-composer h2 { font-size: 20px; line-height: 28px; }
+  .orbit-composer-form > .orbit-toolbar > label { flex: 1 1 100%; width: 100%; }
+  .orbit-fact { padding: 14px 12px; }
+  .orbit-composer-form .orbit-toolbar > .orbit-button { flex: 1 1 140px; }
+  .orbit-post-preview { padding: 16px 12px; }
+  .orbit-upload-drop { padding: 24px 12px; }
+  .orbit-upload-drop input { padding: 8px 0; font-size: 14px !important; }
+  .orbit-attachment-list article { align-items: flex-start; gap: 10px; }
+  .orbit-attachment-list img, .orbit-attachment-type { width: 60px; height: 60px; }
+  .orbit-asset-picker-footer { bottom: -20px; flex-wrap: wrap; }
+  .orbit-asset-card-body .orbit-toolbar { align-items: stretch; }
+  .orbit-asset-card-body .orbit-badge { white-space: normal; }
+  .orbit-asset-card-body .orbit-toolbar > small { width: 100%; }
+  .orbit-asset-card-body h2 { font-size: 14px; }
+  .orbit-calendar-scroll { display: none; }
+  .orbit-calendar-agenda { display: block; }
+  .orbit-agenda-day { margin-top: 20px; }
+  .orbit-agenda-day h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; }
+  .orbit-calendar-agenda .orbit-post-card { padding: 14px; margin-top: 10px; }
+  .orbit-draft-list { grid-template-columns: minmax(0, 1fr); }
+  .orbit-team-table-wrap { overflow: visible; }
+  .orbit-team table, .orbit-team tbody { display: block; }
+  .orbit-team thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .orbit-team tbody tr { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--orbit-line); }
+  .orbit-team td, .orbit-team td:first-child { display: block; min-width: 0; padding: 0; border: 0; }
+  .orbit-team td::before { content: attr(data-label); display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--orbit-muted); margin-bottom: 6px; }
+  .orbit-team td .orbit-toolbar { gap: 8px 20px; }
+}
+@media (max-width: 360px) {
+  .orbit-asset-grid { grid-template-columns: minmax(0, 1fr); }
+  .orbit-asset-visual { height: 170px; }
+  .mission-metrics { grid-template-columns: minmax(0, 1fr); }
+  .mission-metric { min-height: 0; }
+  .mission-metric h2 { min-height: 0; }
+  .mission-metric > div { display: flex; align-items: baseline; gap: 20px; }
+}
