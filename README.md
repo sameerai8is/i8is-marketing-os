@@ -101,3 +101,7 @@ Release checks: anonymous dashboard requests redirect to login; anonymous data A
 Member, content, settings, audit and rate-limit operations are workspace-scoped. The I8IS workspace, company domain and Buffer credentials are fixed server bindings. All models include tenant ownership, but additional organizations still require an onboarding/credential design. Legacy content without a tenant is excluded; no automatic migration occurs.
 
 Security properties: live role/status and Google subject checks on protected requests; PKCE/state/nonce through Auth.js; same-origin mutations; input whitelists; shared database-backed mutation limits; optimistic update conflicts; protected bootstrap administrator. Published/failed statuses cannot be assigned through composer APIs. Editing an approved/scheduled post invalidates approval and removes its schedule. Known limitations: provider access changes are checked at next Google sign-in; existing sessions expire after eight hours unless revoked in Orbit; AI requires human claim review; email delivery webhooks and enterprise SAML are not implemented.
+
+## Google Drive
+
+See [Google Drive setup](docs/google-drive.md) to enable private file browsing/imports and optional copies of new uploads to each user's own My Drive. This uses the existing Google OAuth client with additional consent, not an API key. Imported files are shared workspace copies; Drive originals keep their permissions.

@@ -14,6 +14,8 @@ export interface IAsset {
   driveId?: string;
   driveFolder?: boolean;
   driveNative?: boolean;
+  driveBackupId?: string;
+  driveBackupBy?: string;
   status: "uploading" | "ready";
   approval: "pending" | "approved";
   createdBy: string;
@@ -34,6 +36,7 @@ const schema = new Schema<IAsset>({
   tags: { type: [String], default: [] }, altText: { type: String, default: "", maxlength: 500 },
   kind: { type: String, enum: ["image", "video", "document", "source", "link"], required: true },
   source: { type: String, enum: ["upload", "google_drive"], required: true }, sourceUrl: String, driveId: String, driveFolder: Boolean, driveNative: Boolean,
+  driveBackupId: String, driveBackupBy: String,
   status: { type: String, enum: ["uploading", "ready"], required: true }, approval: { type: String, enum: ["pending", "approved"], default: "pending" },
   createdBy: { type: String, required: true }, size: { type: Number, required: true, min: 0 }, mime: { type: String, default: "application/octet-stream" },
   width: Number, height: Number, storageId: Schema.Types.ObjectId, checksum: String,

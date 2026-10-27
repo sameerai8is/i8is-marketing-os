@@ -3,14 +3,15 @@ import { accessErrorResponse, requireMember, requireSameOrigin } from "@/lib/aut
 import { WorkspaceSettings } from "@/lib/models/WorkspaceSettings";
 import { AuditEvent } from "@/lib/models/AuditEvent";
 import { rateLimit } from "@/lib/rate-limit";
+import { ResearchRun } from "@/lib/models/ResearchRun";
 
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "private, no-store" };
 export async function GET() {
   try {
     const actor = await requireMember();
-    const settings = await WorkspaceSettings.findOne({ tenantId: actor.tenantId }).lean();
-    return NextResponse.json({ settings: settings || { companyName: "I8IS", audience: "", tone: "Professional and clear", marketingGoal: "", autonomy: "assisted", facts: [] }, admin: actor.role === "admin", capabilities: { research: Boolean(process.env.OPENAI_API_KEY), textGeneration: Boolean(process.env.OPENAI_API_KEY) } }, { headers });
+    const [settings, research] = await Promise.all([WorkspaceSettings.findOne({ tenantId: actor.tenantId }).lean(), ResearchRun.findOne({ tenantId: actor.tenantId, status: "ready" }).select("report.facts").lean<{ report?: { facts?: { text: string; source: string }[] } }>()]);
+    return NextResponse.json({ settings: { companyName: "I8IS", audience: "", tone: "Professional and clear", marketingGoal: "", autonomy: "assisted", facts: [], ...settings }, suggestedFacts: research?.report?.facts || [], admin: actor.role === "admin", capabilities: { research: Boolean(process.env.OPENAI_API_KEY), textGeneration: Boolean(process.env.OPENAI_API_KEY) } }, { headers });
   } catch (e) { return accessErrorResponse(e) || NextResponse.json({ error: "Workspace settings could not be loaded." }, { status: 503, headers }); }
 }
 export async function PATCH(request: Request) {
@@ -36,6 +37,7 @@ export async function PATCH(request: Request) {
         values = { companyName: body.companyName.trim(), audience: body.audience.trim(), tone: body.tone.trim(), facts };
       } else return NextResponse.json({ error: "Invalid workspace action." }, { status: 400, headers });
     }
+    await WorkspaceSettings.init();
     const current = await WorkspaceSettings.findOne({ tenantId: actor.tenantId });
     if ((current?.updatedAt.toISOString() || null) !== (body.updatedAt || null)) return NextResponse.json({ error: "Workspace settings changed. Refresh before saving." }, { status: 409, headers });
     const settings = await WorkspaceSettings.findOneAndUpdate({ tenantId: actor.tenantId, ...(current ? { updatedAt: current.updatedAt } : { updatedAt: { $exists: false } }) }, { $set: values, $setOnInsert: { tenantId: actor.tenantId } }, { new: true, upsert: !current, runValidators: true });

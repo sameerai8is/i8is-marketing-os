@@ -7,6 +7,7 @@ import { AssetError } from "@/lib/asset-policy";
 import { withAssetLock } from "@/lib/asset-lock";
 import { assetDTO, checkAssetCapacity, persistFile, resetDriveReference } from "@/lib/asset-storage";
 import { downloadDriveFile } from "@/lib/drive-import";
+import { downloadConnectedDriveFile, driveStatus } from "@/lib/google-drive";
 import { assetFailure, assetHeaders } from "@/lib/asset-response";
 import { rateLimit } from "@/lib/rate-limit";
 export const runtime = "nodejs";
@@ -18,7 +19,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     if (!mongoose.isValidObjectId(id)) throw new AssetError("Drive reference not found.", 404);
     const original = await Asset.findOne({ _id: id, tenantId: actor.tenantId, status: "ready", kind: "link", source: "google_drive" });
     if (!original?.sourceUrl) throw new AssetError("Choose a saved Google Drive file reference.", 404);
-    const file = await downloadDriveFile(original.sourceUrl);
+    const connected = await driveStatus(actor);
+    const file = connected.connected && original.driveId ? await downloadConnectedDriveFile(actor, original.driveId) : await downloadDriveFile(original.sourceUrl);
     await requireMember();
     return await withAssetLock(actor.tenantId, async () => {
       await checkAssetCapacity(actor.tenantId, file.data.length, false);

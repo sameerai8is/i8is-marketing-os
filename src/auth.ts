@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { admitGoogleIdentity } from "@/lib/member-signin";
+import { saveDriveGrant } from "@/lib/google-drive";
 
 export function authConfigured() {
   return Boolean(process.env.AUTH_SECRET && process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET && process.env.AUTH_ADMIN_EMAIL);
@@ -14,7 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ account, profile }) {
       if (!authConfigured() || account?.provider !== "google" || !profile) return false;
-      try { return await admitGoogleIdentity(profile); }
+      try { const admitted = await admitGoogleIdentity(profile); if (admitted) await saveDriveGrant(account, profile); return admitted; }
       catch { return "/login?error=StorageUnavailable"; }
     },
     async jwt({ token, account, profile }) {

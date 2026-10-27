@@ -172,8 +172,15 @@ require('@next/env').loadEnvConfig(process.cwd());
     const signedOut=await check('sign out clears the application session','/api/auth/signout',302,{method:'POST',headers:{Origin:base,'Content-Type':'application/x-www-form-urlencoded',Cookie:regularCookie+'; '+csrfCookie},body:new URLSearchParams({csrfToken:csrfBody.csrfToken,callbackUrl:base+'/login'})});
     assert.ok(signedOut.headers.getSetCookie().some(c=>c.startsWith('authjs.session-token=;')));
     const limiter=fixture('limit@i8is.com','limit-sub','admin');await db.collection('workspacemembers').insertOne(limiter);const limitCookie=await cookie(limiter);
-    for(let i=0;i<10;i++)await check('invite abuse budget attempt '+(i+1),'/api/team',400,mutation({email:'invalid',role:'member'}),limitCookie);
-    await check('invite rate limit enforced across requests','/api/team',429,mutation({email:'invalid',role:'member'}),limitCookie);
+    // Issue the budget burst within one fixed-minute bucket. Sequential remote
+    // requests can cross the boundary and legitimately receive a fresh budget.
+    const remaining=60000-Date.now()%60000;if(remaining<10000)await delay(remaining+100);
+    const statuses=await Promise.all(Array.from({length:11},async()=>{
+      const r=await fetch(base+'/api/team',{...mutation({email:'invalid',role:'member'}),headers:{...mutation({}).headers,Cookie:limitCookie}});return r.status;
+    }));
+    assert.equal(statuses.filter(s=>s===400).length,10,'ten requests use the shared invite budget');
+    assert.equal(statuses.filter(s=>s===429).length,1,'the eleventh concurrent request is rate limited');
+    checkCount+=11;console.log('PASS shared invite rate limit under concurrent requests');
     await require('mongoose').disconnect();
     console.log('PASS '+checkCount+' workflow assertions. Real Google consent and actual email delivery require a human/provider check. No email was sent and no social publishing mutation was called.');
 
