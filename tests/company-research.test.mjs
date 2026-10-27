@@ -15,3 +15,11 @@ test('research evidence comes from provider source metadata, not invented report
 test('research provider errors never expose credentials or upstream bodies', async () => {
   await assert.rejects(researchRequest('private-key', {}, undefined, async () => new Response('secret provider details', { status: 401 })), e => !e.message.includes('secret') && !e.message.includes('private-key'));
 });
+test('unsupported summary claims and third-party company profiles cannot appear as supported company evidence', () => {
+  const profile = 'https://directory.example.com/companies/rival?utm_source=search';
+  const sources = ['https://company.com/about', profile, 'https://rival.com/services'];
+  const report = { summary: 'Founded in 1900 with invented customer numbers. Rival is a confirmed competitor.', facts: [{ text: 'Builds software', source: sources[0] }], competitors: [{ name: 'Rival', website: profile, reason: 'Claimed overlap', source: profile }, { name: 'Another rival', website: 'https://rival.com/?utm_source=search', reason: 'Proposed overlap', source: sources[2] }], recommendations: [], unknowns: [] };
+  const result = validateReport(report, sources, 'https://company.com/');
+  assert.equal(result.summary, 'Builds software'); assert.equal(result.competitors.length, 1); assert.equal(result.competitors[0].name, 'Another rival');
+  assert.ok(!result.summary.includes('1900')); assert.ok(!result.summary.includes('confirmed competitor'));
+});

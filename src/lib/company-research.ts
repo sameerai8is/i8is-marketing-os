@@ -27,9 +27,11 @@ export function validateReport(value: unknown, sources: string[], website: strin
   const known = (u: unknown): u is string => { try { return sources.includes(publicUrl(u)); } catch { return false; } };
   const facts = v.facts.slice(0, 10).filter(f => text(f.text, 1000) && known(f.source) && belongs(f.source, website));
   const seen = new Set<string>();
-  const competitors = v.competitors.slice(0, 8).filter(c => { try { publicUrl(c.website); if (!text(c.name, 200) || !text(c.reason) || !known(c.source) || !belongs(c.source, c.website) || belongs(c.website, website) || seen.has(host(c.website))) return false; seen.add(host(c.website)); return true; } catch { return false; } });
+  const competitors = v.competitors.slice(0, 8).filter(c => { try { const site = new URL(publicUrl(c.website)); if (site.pathname !== "/" || !text(c.name, 200) || !text(c.reason) || !known(c.source) || !belongs(c.source, c.website) || belongs(c.website, website) || seen.has(host(c.website))) return false; seen.add(host(c.website)); return true; } catch { return false; } });
   if (!facts.length) throw new ResearchError("No usable company claims were sourced from this website. Check the URL or add facts manually in Company DNA.");
-  return { summary: v.summary, facts, competitors, recommendations: v.recommendations.slice(0, 8).filter(r => text(r.action, 500) && text(r.reason)), unknowns: v.unknowns.slice(0, 10).filter(s => text(s, 1000)) };
+  // Free-form summaries can reintroduce unsupported claims or competitors that
+  // were removed above. Build the overview only from retained company claims.
+  return { summary: facts.map(f => f.text).join("\n\n"), facts, competitors, recommendations: v.recommendations.slice(0, 8).filter(r => text(r.action, 500) && text(r.reason)), unknowns: v.unknowns.slice(0, 10).filter(s => text(s, 1000)) };
 }
 export async function researchRequest(key: string, body?: object, id?: string, request: typeof fetch = fetch) {
   const r = await request("https://api.openai.com/v1/responses" + (id ? "/" + encodeURIComponent(id) : ""), { method: id ? "GET" : "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(id ? 10000 : 35000) }).catch(() => { throw new ResearchError("The research provider could not be reached. Refresh to retry."); });

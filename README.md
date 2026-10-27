@@ -2,6 +2,8 @@
 
 Internal marketing workspace built with Next.js 15, React 19, TypeScript, Tailwind and MongoDB/Mongoose. I8IS is the first and only onboarded tenant. The product direction is a coordinated multi-agent marketing department; autonomous orchestration is not implemented in this release.
 
+Overview lists implemented workflows, not fictional employee personas or simulated business results. Counts come from saved workspace records; failed requests show unavailable values. Configuration badges indicate credential presence only. Buffer connection checks describe connected profiles, while publishing is explicitly simulated and social engagement metrics are unavailable.
+
 ## Available workflows
 
 - Google Workspace sign-in: verified `i8is.com` staff join as members; the explicitly configured initial admin is bootstrapped on first sign-in.
@@ -36,6 +38,8 @@ Open **Discover**, enter the company's public HTTPS website and optional market/
 Research runs in the provider's background mode with stored responses; the Discover page polls and collects the final result. Keep the page open or return as an admin to resume collection. This is user-triggered research, not a periodic crawler or autonomous background worker. One latest report is retained per workspace. Competing starts are rejected, and abandoned runs can be replaced after 15 minutes. Source URLs must occur in provider search/citation metadata, company claims must cite the company's domain, and competitor evidence must cite its proposed official domain. These checks validate provenance, not whether a claim or competitive relationship is true. Source coverage can be incomplete or pages inaccessible; the report labels analysis, hypotheses and evidence gaps.
 
 Review each company claim and its source before adding it to Company DNA. Approval is administrator-only, version checked and additive. No competitor claims become company facts. Suggested experiments open as editable AI post prompts and still use the existing reviewed-fact generation and human approval workflow. Set `TEST_LIVE_RESEARCH=1` for a paid website/competitor integration run in the disposable test database.
+
+Research overviews are assembled from the retained source-linked company claims so a free-form summary cannot reintroduce unsupported company details or rejected competitors. Proposed competitor websites must be homepage URLs, not directory/profile paths. Supporting links remain unreviewed evidence; a matching hostname does not establish website ownership or a true competitive relationship. AI experiment suggestions are labeled as proposals rather than confirmed company plans.
 
 ## Local setup
 

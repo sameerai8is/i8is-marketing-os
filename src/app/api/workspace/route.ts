@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const actor = await requireMember();
     const settings = await WorkspaceSettings.findOne({ tenantId: actor.tenantId }).lean();
-    return NextResponse.json({ settings: settings || { companyName: "I8IS", audience: "", tone: "Professional and clear", marketingGoal: "", autonomy: "assisted", facts: [] }, admin: actor.role === "admin" }, { headers });
+    return NextResponse.json({ settings: settings || { companyName: "I8IS", audience: "", tone: "Professional and clear", marketingGoal: "", autonomy: "assisted", facts: [] }, admin: actor.role === "admin", capabilities: { research: Boolean(process.env.OPENAI_API_KEY), textGeneration: Boolean(process.env.OPENAI_API_KEY) } }, { headers });
   } catch (e) { return accessErrorResponse(e) || NextResponse.json({ error: "Workspace settings could not be loaded." }, { status: 503, headers }); }
 }
 export async function PATCH(request: Request) {

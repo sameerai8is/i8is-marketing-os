@@ -19,7 +19,7 @@ export const workspacePages = [
 const navGroups = [
   [
     { glyph: "◫", label: "Overview", href: "/" },
-    { glyph: "◉", label: "AI workforce", href: "/#workforce" },
+    { glyph: "◉", label: "Workflows", href: "/#workforce" },
     { glyph: "⌕", label: "Discover", href: "/research" },
     { glyph: "↗", label: "Strategy", href: null },
   ],
@@ -62,7 +62,7 @@ export function Sidebar({ onNavigate, admin = false }: { onNavigate?: () => void
         </div>)}
       </nav>
       {admin && <Link href="/team" onClick={onNavigate} className={`orbit-nav-item${pathname === "/team" ? " is-active" : ""}`} aria-current={pathname === "/team" ? "page" : undefined}><span className="orbit-nav-glyph" aria-hidden="true">♧</span><span>Teams</span></Link>}
-      <div className="orbit-workspace"><span className="orbit-workspace-avatar">i8</span><div><p>I8IS workspace</p><span>Internal · Sandbox mode</span></div></div>
+      <div className="orbit-workspace"><span className="orbit-workspace-avatar">i8</span><div><p>I8IS workspace</p><span>Internal workspace</span></div></div>
     </aside>
   );
 }

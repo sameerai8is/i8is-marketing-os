@@ -51,7 +51,7 @@ export function AppShell({ children, member }: { children: React.ReactNode; memb
             {results.length ? results.map(page => <Link key={page.href} href={page.href} onClick={() => { setSearching(false); setQuery(""); }}>{page.label}<span aria-hidden="true">↗</span></Link>) : <p className="orbit-search-empty">No pages found.</p>}
           </div>}
         </div>
-        <span className="orbit-badge orbit-badge-green orbit-sandbox"><span className="orbit-dot" />Sandbox mode</span>
+        <span className="orbit-badge orbit-badge-green orbit-sandbox"><span className="orbit-dot" />Internal workspace</span>
         <button onClick={() => void signOut({ redirectTo: "/login" })} className="orbit-user-avatar" aria-label={`Sign out ${member.email}`} title={`Sign out ${member.email}`}>{(member.name || member.email).slice(0, 2).toUpperCase()}</button>
       </header>
       <main id="main-content" className="orbit-main" tabIndex={-1}>{children}</main>
