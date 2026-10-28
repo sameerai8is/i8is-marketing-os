@@ -22,7 +22,7 @@ Once the strategy is approved, use **Campaigns** or its strategy detail to gener
 
 Drafts appear in Planner on **proposed dates**. These dates can be changed or cleared in the post editor. They are separate from publishing schedules. Each generated post remains a draft and needs its own content/asset review before scheduling. Starter ideas do not automatically fill every slot in the recommended cadence. Graphics must be chosen or uploaded through Assets; this feature generates text, not images.
 
-Publishing remains simulated. This release does not send posts to Buffer or collect campaign performance metrics.
+Approved posts can be sent through Buffer with separate administrator confirmation; see [Publishing and monitoring](publishing.md). Strategy approval alone does not send anything. Campaign performance metrics are not collected.
 
 ## Verification
 

@@ -32,7 +32,7 @@ require('@next/env').loadEnvConfig(process.cwd());
     const secret = randomBytes(48).toString('base64url');
     server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'start', '--hostname', '127.0.0.1', '--port', '3101'], {
       cwd: process.cwd(), windowsHide: true, stdio: 'ignore',
-      env: { ...process.env, MONGODB_URI: uri.toString(), AUTH_SECRET: secret, AUTH_ADMIN_EMAIL: 'sameera@i8is.com', AUTH_GOOGLE_ID: 'test-only-not-a-real-oauth-client', AUTH_GOOGLE_SECRET: 'test-only-not-a-real-oauth-secret', AUTH_URL: 'http://127.0.0.1:3101', APP_URL: 'http://127.0.0.1:3101', RESEND_API_KEY: '', INVITE_FROM_EMAIL: '' },
+      env: { ...process.env, MONGODB_URI: uri.toString(), AUTH_SECRET: secret, AUTH_ADMIN_EMAIL: 'sameera@i8is.com', AUTH_GOOGLE_ID: 'test-only-not-a-real-oauth-client', AUTH_GOOGLE_SECRET: 'test-only-not-a-real-oauth-secret', AUTH_URL: 'http://127.0.0.1:3101', APP_URL: 'http://127.0.0.1:3101', RESEND_API_KEY: '', INVITE_FROM_EMAIL: '', BUFFER_API_KEY: '', BUFFER_ORGANIZATION_ID: '', CRON_SECRET: '', PUBLISHING_MEDIA_ORIGIN: 'https://fixture.invalid' },
     });
     const base = 'http://127.0.0.1:3101';
     let started = false;
@@ -162,6 +162,7 @@ require('@next/env').loadEnvConfig(process.cwd());
     await require('./asset-workflow-checks.cjs')({ check, db, base, ownerCookie, regularCookie, mutation, patch, fixture, cookie });
     await require('./research-workflow-checks.cjs')({ check, db, ownerCookie, regularCookie, mutation, patch });
     await require('./strategy-workflow-checks.cjs')({ check, db, ownerCookie, regularCookie, adminCookie, mutation, patch });
+    await require('./publishing-workflow-checks.cjs')({ check, db, owner, ownerCookie, regularCookie, mutation, patch, loadTs, secret });
     if (process.env.TEST_LIVE_AI === '1') {
       const generated=await (await check('live AI saves a source-referenced draft','/api/content/generate',201,mutation({prompt:'Introduce what this test company does. Avoid any extra claims.',platform:'linkedin'}),regularCookie)).json();
       assert.equal(generated.status,'draft');assert.ok(generated.sourceFacts.length);console.log('PASS generated output is draft-only with references');

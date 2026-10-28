@@ -2,7 +2,7 @@
 
 Internal marketing workspace built with Next.js 15, React 19, TypeScript, Tailwind and MongoDB/Mongoose. I8IS is the first and only onboarded tenant. The product direction is a coordinated multi-agent marketing department; autonomous orchestration is not implemented in this release.
 
-Overview lists implemented workflows, not fictional employee personas or simulated business results. Counts come from saved workspace records; failed requests show unavailable values. Configuration badges indicate credential presence only. Buffer connection checks describe connected profiles, while publishing is explicitly simulated and social engagement metrics are unavailable.
+Overview lists implemented workflows, not fictional employee personas or simulated business results. Counts come from saved workspace records; failed requests show unavailable values. Configuration badges indicate credential presence only. Buffer connections describe real profiles; approved posts can be published through Buffer. Social engagement metrics are unavailable.
 
 ## Available workflows
 
@@ -10,16 +10,16 @@ Overview lists implemented workflows, not fictional employee personas or simulat
 - Verified external Google users create pending access requests. They receive a restricted session and a waiting page, with no workspace data until approved.
 - Teams: search/filter/paginate people, approve/decline requests, invite people, renew invitations, change roles, revoke/restore access, copy the login link, and view recent access changes.
 - Invitations are bound to the approved Google email, expire after seven days until accepted, and use optional Resend email. The shared login URL is not a bearer credential. Delivery is reported as provider accepted, failed, or not configured; acceptance by the email API is not proof of delivery.
-- Planner: saved drafts, channel/status filtering, working month/week navigation, editing, deletion, previews, review submission, administrator approval, and simulated scheduling with future-date validation.
+- Planner: saved drafts, channel/status filtering, working month/week navigation, editing, deletion, previews, review submission, administrator approval, and explicit live publishing/scheduling through Buffer. Legacy planner-only schedules are labelled and never automatically sent.
 - Responsive workspace: phone agenda for scheduled posts, fluid tablet/desktop calendar, stacked member details on phones, tablet navigation drawer, and scrollable composers/asset pickers with touch-sized controls. Desktop table/calendar views retain their full layout.
 - Company DNA: administrator-reviewed factual claims and references, audience and brand tone. References record administrator review, not automated source verification.
 - Text generation: server-side OpenAI Responses API, reviewed facts required, source references attached to a draft, and human approval required. No autonomous publishing or factual guarantee from the model.
 - Shared goals and review preferences persist in MongoDB. Analytics shows saved-content counts; social engagement metrics are not connected.
-- Buffer: read-only profile discovery behind a provider gateway. No provider publishing mutation exists.
+- Buffer: profile discovery, approved text/image post submission, timed delivery, duplicate protection, explicit safe retries and a publishing monitor behind a provider gateway.
 - Discover: administrator-started website and competitor research through OpenAI web search, with shared source links, candidate competitors, suggested marketing experiments, and individually reviewed company claims. Approved claims are appended to Company DNA; experiments open as Planner briefs. Research never automatically changes verified facts or publishes posts.
 - Asset Library: authenticated file uploads, private previews/downloads, folders/tags/search, alt text, approval, and Google Drive file/folder references. Attach up to ten images, videos or PDFs to a draft, order them, preview them and see thumbnails in the planner. Assets must be approved before post review/scheduling.
 
-Campaign orchestration, AI image/carousel generation, social inbox, automated analytics, durable publishing workers and additional SSO providers remain planned. These screens show their actual availability rather than fabricated sample results.
+Campaign orchestration, AI image/carousel generation, social inbox, automated analytics, autonomous campaign workers and additional SSO providers remain planned. These screens show their actual availability rather than fabricated sample results.
 
 ## Working with brand assets
 
@@ -27,9 +27,9 @@ Open **Assets** in the sidebar. Upload files or save a Google Drive file/folder 
 
 Files are stored in MongoDB GridFS, with 1 MiB upload chunks and streamed downloads, so no additional storage credential is needed. Current prototype limits: 25 MiB per file, 100 MiB reserved/uploaded files per workspace, 1,000 entries, and images up to 40 megapixels. Supported media: PNG, JPEG, WebP, GIF, AVIF, MP4/WebM and PDF. SVG, font and ZIP source files are download-only and cannot be attached to posts. File signatures are checked; image previews are generated server-side. This is not a malware scanning service. Unfinished uploads expire after an hour and their reservation is reclaimed on the next upload/import; temporary chunks also have a database TTL.
 
-Drive links preserve Google's permissions. Individual publicly downloadable files can be imported into Orbit; private files remain references, or users can download them in Drive and upload a copy. No Drive OAuth, automatic folder sync, or permission changes are implemented. Native Docs/Slides/Sheets must be exported to a supported file before attachment. Deleting a reference/import in Orbit never deletes the Google original. Orbit copies are readable by active members of the workspace.
+Drive links preserve Google's permissions. Users can connect their own Google Drive, browse/import permitted files and optionally copy new uploads to their own My Drive. Native Docs/Slides/Sheets can be exported as PDFs. Google Cloud API/scopes and real-user consent must be configured; automatic folder sync and permission changes are not implemented. Deleting a reference/import in Orbit never deletes the Google original. Orbit copies are readable by active members of the workspace.
 
-Post previews show media order rather than a guaranteed social-channel rendering. Scheduling remains simulated. Channel-specific media validation and delivery through Buffer require the future publishing adapter; these private file URLs are not publicly accessible delivery URLs. For larger libraries, move bytes to object storage with signed uploads/downloads and retain the asset metadata/reference layer.
+Post previews show media order rather than a guaranteed social-channel rendering. Live publishing supports text and JPG/PNG images with channel checks. Normal asset URLs remain private; the publishing adapter gives Buffer expiring signed URLs for only the approved request attachments. For larger libraries, move bytes to object storage with signed uploads/downloads and retain the asset metadata/reference layer.
 
 ## Website and competitor research
 
@@ -96,7 +96,7 @@ npm run test:integration
 
 Import `sameerai8is/i8is-marketing-os` into Vercel, use Node 22 and the default Next.js output. Set server environment variables before deployment, with production URLs as above, and redeploy after env changes. MongoDB Atlas must permit the deployment's connection; working local connectivity does not prove cloud connectivity.
 
-Release checks: anonymous dashboard requests redirect to login; anonymous data APIs return 401; pending/blocked users cannot read data; admin Teams loads; a real second Google account can request access and be approved; approved posts can be scheduled only in simulation; Buffer metadata is not public.
+Release checks: anonymous dashboard requests redirect to login; anonymous data APIs return 401; pending/blocked users cannot read data; admin Teams loads; a real second Google account can request access and be approved; approved posts require explicit administrator confirmation for live scheduling; Buffer metadata is not public.
 
 Member, content, settings, audit and rate-limit operations are workspace-scoped. The I8IS workspace, company domain and Buffer credentials are fixed server bindings. All models include tenant ownership, but additional organizations still require an onboarding/credential design. Legacy content without a tenant is excluded; no automatic migration occurs.
 
@@ -108,4 +108,4 @@ See [Google Drive setup](docs/google-drive.md) to enable private file browsing/i
 
 ## Strategy and approvals
 
-See [Strategy, campaigns and approvals](docs/strategy-and-approvals.md) for goal selection, source-grounded plan generation, review assignments and feedback, campaign drafts and proposed calendar dates. Strategy approval and individual post approval are separate steps. Live publishing remains simulated.
+See [Strategy, campaigns and approvals](docs/strategy-and-approvals.md) for goal selection, source-grounded plan generation, review assignments and feedback, campaign drafts and proposed calendar dates. Strategy approval and individual post approval are separate steps. See [Publishing and monitoring](docs/publishing.md) for live Buffer delivery, media hosting, recovery and verification limits.

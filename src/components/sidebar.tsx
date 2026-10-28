@@ -9,6 +9,7 @@ export const workspacePages = [
   { href: "/research", label: "Website and competitor research" },
   { href: "/strategy", label: "Strategy" },
   { href: "/approvals", label: "Approvals" },
+  { href: "/publishing", label: "Publishing monitor" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/creative", label: "Creative lab" },
   { href: "/assets", label: "Asset library" },
@@ -35,6 +36,7 @@ const navGroups = [
   ],
   [
     { glyph: "◷", label: "Intelligence", href: "/performance" },
+    { glyph: "↗", label: "Publishing", href: "/publishing" },
     { glyph: "▥", label: "Social inbox", href: null },
   ],
   [

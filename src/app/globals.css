@@ -491,3 +491,12 @@ body:has(dialog[open]) { overflow: hidden; }
   .orbit-strategy-card { padding: 18px; }
   .orbit-review-assignment select { font-size: 16px; }
 }
+/* Publishing requests retain readable layouts on narrow screens. */
+.orbit-delivery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.orbit-delivery-card { min-width: 0; overflow-wrap: anywhere; }
+.orbit-delivery-times { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 8px 16px; margin: 16px 0; font-size: 13px; }
+.orbit-delivery-times dt { color: #737b76; }
+.orbit-delivery-times dd { margin: 0; }
+.orbit-publish-panel label, .orbit-delivery-card label { display: grid; gap: 8px; margin: 12px 0; }
+.orbit-publish-panel select, .orbit-publish-panel input, .orbit-delivery-card input { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #d9ded9; border-radius: 8px; background: white; color: #16251d; }
+@media (max-width: 900px) { .orbit-delivery-grid { grid-template-columns: minmax(0, 1fr); } }

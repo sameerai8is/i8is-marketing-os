@@ -13,6 +13,7 @@ export interface IContentItem extends Document {
   strategyIdeaIndex?: number;
   plannedAt?: string;
   createdBy?: string;
+  publishingId?: string;
   imageUrl?: string;
   sourceFacts?: { text: string; source: string }[];
   assetIds?: string[];
@@ -42,6 +43,7 @@ const ContentItemSchema = new Schema<IContentItem>(
     strategyIdeaIndex: Number,
     plannedAt: String,
     createdBy: String,
+    publishingId: String,
     imageUrl: String,
     sourceFacts: [{ text: String, source: String, _id: false }],
     assetIds: { type: [String], default: [] },

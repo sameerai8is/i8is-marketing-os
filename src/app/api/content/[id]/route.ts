@@ -23,6 +23,7 @@ async function mutate(request: Request, context: { params: Promise<{ id: string 
     if (!mongoose.isValidObjectId(id)) return NextResponse.json({ error: "Post not found." }, { status: 404, headers });
     const item = await ContentItem.findOne({ _id: id, tenantId: actor.tenantId });
     if (!item) return NextResponse.json({ error: "Post not found." }, { status: 404, headers });
+    if (item.publishingId) return NextResponse.json({ error: "This post has a publishing request. Use Publishing Monitor to check or cancel it before editing or deleting." }, { status: 409, headers });
     const body = await request.json();
     if (body?.updatedAt !== item.updatedAt.toISOString()) return NextResponse.json({ error: "This post changed since you opened it. Refresh before saving." }, { status: 409, headers });
     const filter = { _id: item._id, tenantId: actor.tenantId, updatedAt: item.updatedAt };
