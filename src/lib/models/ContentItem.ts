@@ -9,6 +9,10 @@ export interface IContentItem extends Document {
   scheduledAt?: Date;
   publishedAt?: Date;
   campaignId?: string;
+  strategyRevision?: number;
+  strategyIdeaIndex?: number;
+  plannedAt?: string;
+  createdBy?: string;
   imageUrl?: string;
   sourceFacts?: { text: string; source: string }[];
   assetIds?: string[];
@@ -34,6 +38,10 @@ const ContentItemSchema = new Schema<IContentItem>(
     scheduledAt: Date,
     publishedAt: Date,
     campaignId: String,
+    strategyRevision: Number,
+    strategyIdeaIndex: Number,
+    plannedAt: String,
+    createdBy: String,
     imageUrl: String,
     sourceFacts: [{ text: String, source: String, _id: false }],
     assetIds: { type: [String], default: [] },
@@ -43,6 +51,7 @@ const ContentItemSchema = new Schema<IContentItem>(
 
 ContentItemSchema.index({ tenantId: 1, scheduledAt: -1 });
 ContentItemSchema.index({ tenantId: 1, assetIds: 1 });
+ContentItemSchema.index({ tenantId: 1, campaignId: 1, strategyRevision: 1, strategyIdeaIndex: 1 }, { unique: true, partialFilterExpression: { campaignId: { $type: "string" }, strategyRevision: { $type: "number" }, strategyIdeaIndex: { $type: "number" } } });
 
 export const ContentItem: Model<IContentItem> =
   mongoose.models.ContentItem || mongoose.model<IContentItem>("ContentItem", ContentItemSchema);

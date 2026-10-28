@@ -1,0 +1,2 @@
+import { StrategyWorkspace } from "@/components/strategy-workspace";
+export default function StrategyPage() { return <StrategyWorkspace />; }

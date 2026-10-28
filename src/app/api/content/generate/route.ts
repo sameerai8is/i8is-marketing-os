@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const draft = await generateDraft({ prompt: body.prompt.trim(), platform: body.platform, companyName: settings.companyName, tone: settings.tone, audience: settings.audience, facts: settings.facts.map((f: { text: string; source: string }) => ({ text: f.text, source: f.source })) }, process.env.OPENAI_API_KEY);
     // A revocation during generation must take effect before persisting output.
     await requireMember();
-    const item = await withAssetLock(actor.tenantId, async () => { await validateAssetReferences(actor.tenantId, ids); return ContentItem.create({ ...draft, status: "draft", tenantId: actor.tenantId, assetIds: ids }); });
+    const item = await withAssetLock(actor.tenantId, async () => { await validateAssetReferences(actor.tenantId, ids); return ContentItem.create({ ...draft, status: "draft", tenantId: actor.tenantId, assetIds: ids, createdBy: actor.email }); });
     await AuditEvent.create({ tenantId: actor.tenantId, actor: actor.email, action: "content.generated", target: item.id });
     return NextResponse.json((await postsWithAssets([item], actor.tenantId))[0], { status: 201, headers });
   } catch (e) {

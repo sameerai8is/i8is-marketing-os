@@ -461,3 +461,33 @@ body:has(dialog[open]) { overflow: hidden; }
   .mission-metric h2 { min-height: 0; }
   .mission-metric > div { display: flex; align-items: baseline; gap: 20px; }
 }
+
+/* Strategy planning and the shared review inbox */
+.orbit-strategy-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.orbit-strategy-card { padding: 22px; text-align: left; display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow-wrap: anywhere; }
+.orbit-strategy-card h2 { font-size: 18px; font-weight: 650; line-height: 1.4; }
+.orbit-strategy-card p, .orbit-strategy-card small { color: var(--orbit-muted); font-size: 13px; line-height: 1.6; }
+.orbit-strategy-card.is-selected { border-color: var(--orbit-blue); box-shadow: 0 0 0 1px var(--orbit-blue); }
+.orbit-strategy-editor { padding: clamp(16px, 3vw, 30px); scroll-margin-top: 20px; }
+.orbit-strategy-editor h2 { font-size: 22px; font-weight: 650; }
+.orbit-strategy-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.orbit-goal-options { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 24px; }
+.orbit-strategy-sections { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
+.orbit-strategy-sections h3, .orbit-strategy-sections summary { font-weight: 650; }
+.orbit-strategy-sections details > summary { cursor: pointer; padding: 3px 0; }
+.orbit-strategy-sections details[open] > summary { margin-bottom: 16px; }
+.orbit-strategy-sections .orbit-fact > article { padding: 12px 0; border-bottom: 1px solid var(--orbit-line); }
+.orbit-strategy-sections p { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+.orbit-review-assignment { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.orbit-review-assignment select { width: 100%; max-width: 100%; padding: 10px; border: 1px solid var(--orbit-line); border-radius: 9px; background: white; }
+.orbit-review-comments { display: flex; flex-direction: column; gap: 12px; }
+.orbit-review-comment { padding: 14px; border-left: 3px solid var(--orbit-blue); background: #f5f7fb; border-radius: 8px; font-size: 13px; line-height: 1.7; }
+.orbit-review-comment p { margin: 8px 0; overflow-wrap: anywhere; }
+.orbit-review-comment.is-resolved { border-left-color: #76a58b; background: #f2f8f4; }
+.orbit-review-history { padding-left: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; margin-top: 14px; overflow-wrap: anywhere; }
+.orbit-composer .orbit-fact img { max-width: 100%; height: auto; object-fit: contain; }
+@media (max-width: 640px) {
+  .orbit-strategy-fields, .orbit-goal-options { grid-template-columns: minmax(0, 1fr); }
+  .orbit-strategy-card { padding: 18px; }
+  .orbit-review-assignment select { font-size: 16px; }
+}

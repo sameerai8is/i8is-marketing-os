@@ -1,4 +1,2 @@
-import Link from "next/link";
-export default function CampaignsPage() {
-  return <div className="orbit-team"><div className="mission-header"><div><h1>Campaign Studio</h1><p>Campaign orchestration is the next workflow milestone.</p></div></div><section className="orbit-surface p-8 mt-6"><span className="orbit-badge orbit-badge-amber">Planned</span><h2 className="mt-5">Start with a reviewed post.</h2><p className="text-sm text-muted-foreground my-4">You can save a workspace goal on Overview, maintain verified company facts, and create channel-specific drafts in the Planner. Multi-post campaign generation and autonomous execution are not enabled yet.</p><div className="orbit-toolbar"><Link className="orbit-button orbit-button-dark" href="/calendar">Open the Planner</Link><Link className="orbit-text-button" href="/">Set a marketing goal</Link></div></section></div>;
-}
+import { StrategyWorkspace } from "@/components/strategy-workspace";
+export default function CampaignsPage() { return <StrategyWorkspace campaigns />; }

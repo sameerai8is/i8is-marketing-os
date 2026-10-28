@@ -9,6 +9,8 @@ import { assetFields, AssetError } from "@/lib/asset-policy";
 import { assetDTO, removeAssetBytes } from "@/lib/asset-storage";
 import { assetFailure, assetHeaders } from "@/lib/asset-response";
 import { rateLimit } from "@/lib/rate-limit";
+import { assertReviewAllowed, recordReviewDecision } from "@/lib/reviews";
+import { reviewNote } from "@/lib/review-policy";
 
 export const runtime = "nodejs";
 type Context = { params: Promise<{ id: string }> };
@@ -40,14 +42,21 @@ async function mutate(request: Request, context: Context, remove = false) {
       }
       if (item.status !== "ready") throw new AssetError("Complete the upload before editing it.", 409);
       let values;
-      if (body.action === "metadata") values = assetFields(body);
-      else if (["approve", "unapprove"].includes(body.action)) {
+      if (body.action === "metadata") {
+        if (item.approval === "approved" && await ContentItem.exists({ tenantId: actor.tenantId, assetIds: id, status: { $ne: "draft" } })) throw new AssetError("Return linked posts to draft before changing this approved asset.", 409);
+        values = { ...assetFields(body), approval: "pending" };
+      }
+      else if (["approve", "unapprove", "request_changes"].includes(body.action)) {
+        if (item.kind === "link") throw new AssetError("Import the Drive file before approving it as a post asset.", 409);
         if (actor.role !== "admin") throw new AssetError("Only administrators can approve assets.", 403);
-        if (body.action === "unapprove" && await ContentItem.exists({ tenantId: actor.tenantId, assetIds: id, status: { $ne: "draft" } })) throw new AssetError("Return linked posts to draft before removing this asset’s approval.", 409);
+        if (body.action !== "approve" && await ContentItem.exists({ tenantId: actor.tenantId, assetIds: id, status: { $ne: "draft" } })) throw new AssetError("Return linked posts to draft before removing this asset’s approval.", 409);
+        await assertReviewAllowed(actor, "asset", id, body.action === "approve");
+        if (body.action === "request_changes") reviewNote(body.note, true);
         values = { approval: body.action === "approve" ? "approved" : "pending" };
       } else throw new AssetError("Choose a supported asset action.");
       const updated = await Asset.findOneAndUpdate({ _id: item._id, tenantId: actor.tenantId, updatedAt: item.updatedAt }, { $set: values }, { new: true, runValidators: true });
       if (!updated) throw new AssetError("This asset changed. Refresh before saving.", 409);
+      if (["approve", "unapprove", "request_changes"].includes(body.action)) await recordReviewDecision(actor, "asset", id, item.updatedAt.toISOString(), body.action === "request_changes" ? "reject" : body.action, body.action === "request_changes" ? body.note : undefined);
       await AuditEvent.create({ tenantId: actor.tenantId, actor: actor.email, action: `asset.${body.action}`, target: id });
       return NextResponse.json(assetDTO(updated), { headers: assetHeaders });
     });

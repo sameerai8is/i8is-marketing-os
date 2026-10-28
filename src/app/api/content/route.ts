@@ -3,7 +3,7 @@ import { ContentItem } from "@/lib/models/ContentItem";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { accessErrorResponse, requireMember, requireSameOrigin } from "@/lib/authorization";
-import { ContentError, draftFields, initialStatus } from "@/lib/content-policy";
+import { ContentError, draftFields, initialStatus, plannedDate } from "@/lib/content-policy";
 import { rateLimit } from "@/lib/rate-limit";
 import { AssetError, attachmentIds } from "@/lib/asset-policy";
 import { withAssetLock } from "@/lib/asset-lock";
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Expected a content object" }, { status: 400 });
     }
     const ids = attachmentIds(body.assetIds);
-    const candidate = new ContentItem({ ...draftFields(body), status: initialStatus(body.status), assetIds: ids, tenantId: member.tenantId });
+    const candidate = new ContentItem({ ...draftFields(body), status: initialStatus(body.status), assetIds: ids, tenantId: member.tenantId, createdBy: member.email, plannedAt: plannedDate(body.plannedAt) });
     await candidate.validate();
     await dbConnect();
     const item = await withAssetLock(member.tenantId, async () => {

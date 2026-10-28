@@ -1,5 +1,10 @@
 export const platforms = ["linkedin", "instagram", "facebook", "twitter"] as const;
 export class ContentError extends Error {}
+export function plannedDate(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0, 10) !== value) throw new ContentError("Choose a valid proposed calendar date.");
+  return value;
+}
 export function draftFields(input: unknown) {
   if (!input || typeof input !== "object" || Array.isArray(input)) throw new ContentError("Provide a content object.");
   const b = input as Record<string, unknown>;

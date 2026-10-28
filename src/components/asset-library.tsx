@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DrivePanel } from "./drive-panel";
@@ -16,6 +17,7 @@ const empty: LibraryData = { items: [], total: 0, pages: 1, folders: [], usedByt
 const tagsFromText = (text: string) => text.split(",").map(s => s.trim()).filter(Boolean);
 
 export function AssetLibrary({ onChoose, initialSelection = [] }: Props) {
+  const requestedAsset = useSearchParams().get("asset");
   const [data, setData] = useState<LibraryData>(empty), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false);
   const [error, setError] = useState(""), [message, setMessage] = useState("");
   const [query, setQuery] = useState(""), [folder, setFolder] = useState("*"), [kind, setKind] = useState(""), [source, setSource] = useState(""), [approval, setApproval] = useState(""), [page, setPage] = useState(1);
@@ -37,6 +39,11 @@ export function AssetLibrary({ onChoose, initialSelection = [] }: Props) {
     finally { if (!signal?.aborted) setLoading(false); }
   }, [page, query, folder, kind, source, approval]);
   useEffect(() => { const c = new AbortController(), timer = setTimeout(() => void load(c.signal), 180); return () => { clearTimeout(timer); c.abort(); }; }, [load]);
+  useEffect(() => {
+    if (!requestedAsset || onChoose) return; const c = new AbortController();
+    void loadJSON(`/api/assets/${encodeURIComponent(requestedAsset)}`, c.signal).then((a: LibraryAsset) => { setDetail(a); setName(a.name); setDetailFolder(a.folder); setTags(a.tags.join(", ")); setAltText(a.altText); details.current?.showModal(); }).catch(e => { if (!c.signal.aborted) setError(e.message); });
+    return () => c.abort();
+  }, [requestedAsset, onChoose]);
   async function api(path: string, method: string, body?: object) {
     const r = await fetch(path, { method, headers: { "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}) });
     return responseJSON(r);

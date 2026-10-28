@@ -7,6 +7,8 @@ export const workspacePages = [
   { href: "/", label: "Overview" },
   { href: "/calendar", label: "Planner" },
   { href: "/research", label: "Website and competitor research" },
+  { href: "/strategy", label: "Strategy" },
+  { href: "/approvals", label: "Approvals" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/creative", label: "Creative lab" },
   { href: "/assets", label: "Asset library" },
@@ -21,7 +23,7 @@ const navGroups = [
     { glyph: "◫", label: "Overview", href: "/" },
     { glyph: "◉", label: "Workflows", href: "/#workforce" },
     { glyph: "⌕", label: "Discover", href: "/research" },
-    { glyph: "↗", label: "Strategy", href: null },
+    { glyph: "↗", label: "Strategy", href: "/strategy" },
   ],
   [
     { glyph: "▦", label: "Planner", href: "/calendar" },
@@ -29,7 +31,7 @@ const navGroups = [
     { glyph: "✦", label: "Creative lab", href: "/creative" },
     { glyph: "≡", label: "Editorial", href: null },
     { glyph: "▤", label: "Assets", href: "/assets" },
-    { glyph: "◎", label: "Approvals", href: null },
+    { glyph: "◎", label: "Approvals", href: "/approvals" },
   ],
   [
     { glyph: "◷", label: "Intelligence", href: "/performance" },

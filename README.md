@@ -105,3 +105,7 @@ Security properties: live role/status and Google subject checks on protected req
 ## Google Drive
 
 See [Google Drive setup](docs/google-drive.md) to enable private file browsing/imports and optional copies of new uploads to each user's own My Drive. This uses the existing Google OAuth client with additional consent, not an API key. Imported files are shared workspace copies; Drive originals keep their permissions.
+
+## Strategy and approvals
+
+See [Strategy, campaigns and approvals](docs/strategy-and-approvals.md) for goal selection, source-grounded plan generation, review assignments and feedback, campaign drafts and proposed calendar dates. Strategy approval and individual post approval are separate steps. Live publishing remains simulated.
